@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.TableGenerator;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -30,7 +32,10 @@ import lombok.NoArgsConstructor;
 public class Order {
 
     @Id
-    @GeneratedValue
+    @TableGenerator(name = "orders_generator", table = "shopeasy_id_sequences",
+            pkColumnName = "sequence_name", valueColumnName = "next_val",
+            pkColumnValue = "orders", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "orders_generator")
     private Long id;
 
     @Column(name = "created_at", updatable = false)
