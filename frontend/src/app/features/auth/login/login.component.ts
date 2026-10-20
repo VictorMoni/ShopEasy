@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -17,6 +17,10 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
 export class LoginComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  get requiresLogin(): boolean {
+    return this.route.snapshot.queryParamMap.get('reason') === 'signin-required';
+  }
   loginForm!: FormGroup;
   error: string | null = null;
   loading = false;

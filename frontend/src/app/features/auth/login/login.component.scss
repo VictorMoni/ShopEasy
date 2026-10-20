@@ -1,1 +1,10 @@
 // Shared controls and page surfaces are defined in src/styles.scss.
+
+.signin-note {
+  background: var(--soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: var(--ink);
+  font-size: .85rem;
+}

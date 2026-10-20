@@ -6,13 +6,11 @@ import { AuthService } from '../../features/auth/auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  let authServiceMock: jasmine.SpyObj<AuthService>;
+  let authServiceMock: Pick<AuthService, 'isLoggedIn$'>;
   let routerMock: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const spyAuth = jasmine.createSpyObj('AuthService', [], {
-      isLoggedIn$: of(true),
-    });
+    const spyAuth = { isLoggedIn$: of(true) };
 
     const spyRouter = jasmine.createSpyObj('Router', ['parseUrl']);
 
@@ -27,7 +25,7 @@ describe('AuthGuard', () => {
     guard = TestBed.inject(AuthGuard);
     authServiceMock = TestBed.inject(
       AuthService
-    ) as jasmine.SpyObj<AuthService>;
+    ) as Pick<AuthService, 'isLoggedIn$'>;
     routerMock = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
@@ -46,7 +44,7 @@ describe('AuthGuard', () => {
     routerMock.parseUrl.and.returnValue(fakeTree);
 
     guard.canActivate(null as any, null as any).subscribe((result) => {
-      expect(routerMock.parseUrl).toHaveBeenCalledWith('/login');
+      expect(routerMock.parseUrl).toHaveBeenCalledWith('/login?reason=signin-required');
       expect(result).toBe(fakeTree);
     });
   }));

@@ -1,37 +1,43 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HeaderComponent } from '../../../core/components/header/header.component';
-import { AuthService } from '../../../features/auth/auth.service';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
-import { By } from '@angular/platform-browser';
+import { LoginComponent } from './login.component';
+import { AuthService } from '../auth.service';
 
-describe('HeaderComponent', () => {
-  let component: HeaderComponent;
-  let fixture: ComponentFixture<HeaderComponent>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
-
+describe('LoginComponent', () => {
+  let fixture: ComponentFixture<LoginComponent>;
+  let auth: jasmine.SpyObj<AuthService>;
+  const route = { snapshot: { queryParamMap: convertToParamMap({}) } };
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('AuthService', [], {
-      isLoggedIn$: of(true),
-    });
-
+    route.snapshot.queryParamMap = convertToParamMap({});
+    auth = jasmine.createSpyObj('AuthService', ['login']);
     await TestBed.configureTestingModule({
-      providers: [{ provide: AuthService, useValue: spy }],
+      imports: [LoginComponent],
+      providers: [provideRouter([]), { provide: AuthService, useValue: auth },
+        { provide: ActivatedRoute, useValue: route }],
     }).compileComponents();
-
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    fixture = TestBed.createComponent(HeaderComponent);
-    component = fixture.componentInstance;
+    fixture = TestBed.createComponent(LoginComponent);
     fixture.detectChanges();
   });
-
-  it('deve exibir botão de logout quando isLoggedIn$ emitir true', () => {
+  it('explains why an anonymous visitor was redirected', () => {
+    route.snapshot.queryParamMap = convertToParamMap({reason: 'signin-required'});
     fixture.detectChanges();
-    const btnLogout = fixture.debugElement.query(By.css('button.logout'));
-    expect(btnLogout).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[role="status"]').textContent)
+      .toContain('Para explorar os produtos');
+    expect(fixture.nativeElement.querySelector('.error-message')).toBeNull();
   });
-
-  it('logout deve chamar authService.logout()', () => {
-    component.logout();
-    expect(authServiceSpy.logout).toHaveBeenCalled();
+  it('does not show the contextual note for an ordinary login', () => {
+    expect(fixture.nativeElement.querySelector('[role="status"]')).toBeNull();
+  });
+  it('keeps invalid forms from submitting', () => {
+    fixture.componentInstance.onSubmit();
+    expect(auth.login).not.toHaveBeenCalled();
+  });
+  it('opens products after a successful login', () => {
+    auth.login.and.returnValue(of({accessToken: 'test-access', refreshToken: 'test-refresh'}));
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    fixture.componentInstance.loginForm.setValue({username:'customer',password:'test-password'});
+    fixture.componentInstance.onSubmit();
+    expect(navigate).toHaveBeenCalledWith(['/products']);
   });
 });

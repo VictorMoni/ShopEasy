@@ -13,6 +13,9 @@
     <h2>Entre na sua conta.</h2>
     <p>Seus produtos e pedidos, em um só lugar.</p>
 
+    <p *ngIf="requiresLogin" class="signin-note" role="status">
+      Para explorar os produtos, entre na sua conta ou crie um cadastro gratuito.
+    </p>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="username">Usuário</label>
