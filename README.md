@@ -1,3 +1,5 @@
+![ShopEasy — project cover](.github/project-cover-dark.svg)
+
 # ShopEasy
 
 This repository contains a simple **E-commerce Application**, composed of:
