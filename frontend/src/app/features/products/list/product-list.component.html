@@ -32,7 +32,8 @@
         [class.alternate]="i % 2 === 1"
         [routerLink]="['/products', produto.id]"
         [attr.aria-label]="'Ver ' + produto.name"
-        ><span class="product-monogram" aria-hidden="true">{{
+        ><img *ngIf="produto.imageUrl" [src]="produto.imageUrl" [alt]="produto.name" loading="lazy" width="600" height="450" />
+        <span *ngIf="!produto.imageUrl" class="product-monogram" aria-hidden="true">{{
           produto.name.slice(0, 1).toUpperCase()
         }}</span
         ><span class="visual-label">{{

@@ -57,6 +57,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            if (!"access".equals(claims.get("token_use", String.class))) {
+                throw new JwtException("Token de acesso obrigatório");
+            }
             String username = claims.getSubject();
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

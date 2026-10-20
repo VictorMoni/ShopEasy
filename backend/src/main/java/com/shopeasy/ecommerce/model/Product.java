@@ -54,6 +54,8 @@ public class Product {
     
     private String category;
 
+    private String imageUrl;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

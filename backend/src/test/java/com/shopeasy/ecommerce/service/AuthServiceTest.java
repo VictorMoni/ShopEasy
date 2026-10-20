@@ -90,7 +90,7 @@ class AuthServiceTest {
         String username = "fulano";
         UserDetails userDetails = mock(UserDetails.class);
 
-        when(jwtUtil.isTokenValid("valid-refresh-token")).thenReturn(true);
+        when(jwtUtil.isRefreshToken("valid-refresh-token")).thenReturn(true);
         when(jwtUtil.getUsernameFromToken("valid-refresh-token")).thenReturn(username);
         when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
         when(jwtUtil.generateToken(userDetails)).thenReturn("new-access-token");
@@ -105,7 +105,7 @@ class AuthServiceTest {
     void shouldThrowUnauthorizedException_WhenRefreshTokenInvalid() {
         RefreshRequest request = new RefreshRequest("invalid-token");
 
-        when(jwtUtil.isTokenValid("invalid-token")).thenReturn(false);
+        when(jwtUtil.isRefreshToken("invalid-token")).thenReturn(false);
 
         UnauthorizedException ex = assertThrows(
                 UnauthorizedException.class,

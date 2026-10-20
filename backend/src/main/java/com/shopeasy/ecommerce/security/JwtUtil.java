@@ -32,6 +32,7 @@ public class JwtUtil {
     public String generateToken(UserDetails user) {
         return Jwts.builder()
                 .subject(user.getUsername())
+                .claim("token_use", "access")
                 .claim("roles", user.getAuthorities()
                         .stream().map(GrantedAuthority::getAuthority).toList())
                 .issuedAt(new Date())
@@ -43,6 +44,7 @@ public class JwtUtil {
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
+                .claim("token_use", "refresh")
                 .claim("roles", userDetails.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)
@@ -88,6 +90,14 @@ public class JwtUtil {
     public boolean isTokenExpired(String token) {
         Date expiration = extractAllClaims(token).getExpiration();
         return expiration.before(new Date());
+    }
+
+    public boolean isRefreshToken(String token) {
+        try {
+            return "refresh".equals(extractAllClaims(token).get("token_use", String.class));
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     public boolean isTokenValid(String token) {

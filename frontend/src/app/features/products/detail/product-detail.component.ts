@@ -35,6 +35,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.productForm = createProductForm(this.fb);
     const subRole = this.authService.isAdmin$.subscribe((isAdm) => {
       this.isAdmin = isAdm;
     });
@@ -47,7 +48,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
     this.loadProduct();
 
-    this.productForm = createProductForm(this.fb);
   }
 
   loadProduct(): void {

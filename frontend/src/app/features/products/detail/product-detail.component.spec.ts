@@ -92,18 +92,10 @@ describe('ProductDetailComponent (ajustado)', () => {
   });
 
   it('ngOnInit com id inválido deve exibir erro e não chamar getById', fakeAsync(() => {
-    const routeStubInvalid = {
-      snapshot: {
-        paramMap: { get: (key: string) => (key === 'id' ? 'abc' : null) },
-      },
-    };
-    TestBed.overrideProvider(ActivatedRoute, {
-      useValue: routeStubInvalid,
-    });
-
-    fixture = TestBed.createComponent(ProductDetailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    productServiceSpy.getById.calls.reset();
+    const route = TestBed.inject(ActivatedRoute);
+    spyOn(route.snapshot.paramMap, 'get').and.returnValue('abc');
+    component.ngOnInit();
     tick();
 
     expect(component.error).toBe('ID de produto inválido.');

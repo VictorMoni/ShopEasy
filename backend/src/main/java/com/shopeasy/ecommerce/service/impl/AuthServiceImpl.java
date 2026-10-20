@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse refresh(RefreshRequest request) {
         log.info("♻️ Requisição de refresh token");
 
-        if (!jwtUtil.isTokenValid(request.getRefreshToken())) {
+        if (!jwtUtil.isRefreshToken(request.getRefreshToken())) {
             log.warn("❌ Token de refresh inválido");
             throw new UnauthorizedException("Token inválido ou expirado");
         }

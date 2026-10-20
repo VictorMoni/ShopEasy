@@ -9,6 +9,7 @@
 
   <div *ngIf="!loading && !error && product">
     <div *ngIf="!editMode">
+      <img *ngIf="product.imageUrl" class="product-image" [src]="product.imageUrl" [alt]="product.name" width="600" height="450" />
       <div><strong>ID:</strong> {{ product.id }}</div>
       <div><strong>Nome:</strong> {{ product.name }}</div>
       <div><strong>Descrição:</strong> {{ product.description || "—" }}</div>

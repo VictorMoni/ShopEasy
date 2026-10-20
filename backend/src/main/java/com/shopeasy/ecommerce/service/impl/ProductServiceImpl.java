@@ -41,6 +41,9 @@ public class ProductServiceImpl implements ProductService {
         log.info("📦 Buscando produtos com filtros - nome: {}, categoria: {}, min: {}, max: {}, página: {}, tamanho: {}",
                 name, category, minPrice, maxPrice, page, size);
 
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("Página inválida ou tamanho fora do limite de 1 a 100");
+        }
         Specification<Product> spec = ProductSpecifications.filterBy(name, category, minPrice, maxPrice);
         Pageable pageable = PageRequest.of(page, size, Sort.by("name"));
 

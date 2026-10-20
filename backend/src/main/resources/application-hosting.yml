@@ -34,3 +34,9 @@ app:
     allowed-origins: ${FRONTEND_URL}
   registration:
     allow-admin: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

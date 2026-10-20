@@ -120,6 +120,9 @@ public class OrderController implements OrderApi {
     }
 
     private Pageable orderPage(int page, int size, String sortBy, String direction) {
+        if (page < 0 || size < 1 || size > 100 || !java.util.Set.of("id", "createdAt", "total", "status").contains(sortBy)) {
+            throw new IllegalArgumentException("Paginação ou ordenação inválida");
+        }
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         return PageRequest.of(page, size, sort);

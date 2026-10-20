@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Injectable } from '@angular/core';
 import {
   HttpInterceptor,
@@ -18,6 +19,11 @@ export class JwtInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
+    const target = new URL(req.url, window.location.origin);
+    const api = new URL(environment.apiUrl);
+    if (target.origin !== api.origin || !target.pathname.startsWith('/api/')) {
+      return next.handle(req);
+    }
     if (
       req.url.endsWith('/api/auth/register') ||
       req.url.endsWith('/api/auth/login') ||
