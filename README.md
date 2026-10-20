@@ -238,3 +238,7 @@ If you have any questions or suggestions, open an [issue](https://github.com/vic
 
 **Author:** Victor Moni  
 **License:** MIT License (see the [LICENSE](LICENSE) file for more details)
+
+## Local backend validation
+
+See [the local smoke-test guide](docs/local-smoke-test.md) for the disposable backend launcher and validation results.

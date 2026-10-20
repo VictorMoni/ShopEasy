@@ -1,6 +1,7 @@
 # ========================
 # GERAL
 # ========================
+/.local-runtime/
 # IDEs e sistemas operacionais
 .idea/
 .vscode/
