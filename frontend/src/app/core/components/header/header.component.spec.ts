@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute } from '@angular/router';
+import { provideRouter } from '@angular/router';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -15,15 +15,12 @@ describe('HeaderComponent', () => {
   beforeEach(async () => {
     const spy = jasmine.createSpyObj('AuthService', ['logout'], {
       isLoggedIn$: of(true),
+      isAdmin$: of(false),
     });
-    const routeStub = { snapshot: { paramMap: { get: () => null } } };
 
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, CommonModule, RouterTestingModule],
-      providers: [
-        { provide: AuthService, useValue: spy },
-        { provide: ActivatedRoute, useValue: routeStub },
-      ],
+      providers: [{ provide: AuthService, useValue: spy }, provideRouter([])],
     }).compileComponents();
 
     authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;

@@ -1,23 +1,51 @@
+<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 <header class="header-bar">
-  <nav class="nav-container">
+  <nav class="nav-container" aria-label="Navegação principal">
+    <a routerLink="/" class="brand" aria-label="ShopEasy — página inicial"
+      ><span class="brand-symbol" aria-hidden="true">s.</span>shop<span
+        >easy</span
+      ></a
+    >
     <ul class="nav-list">
-      <li><a routerLink="/" routerLinkActive="active">Home</a></li>
-      <li *ngIf="loggedIn$ | async">
-        <a routerLink="/products" routerLinkActive="active">Produtos</a>
+      <li>
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          >Início</a
+        >
       </li>
       <li *ngIf="loggedIn$ | async">
-        <a routerLink="/orders" routerLinkActive="active">Pedidos</a>
+        <a
+          routerLink="/products"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >Produtos</a
+        >
+      </li>
+      <li *ngIf="loggedIn$ | async">
+        <a
+          routerLink="/orders"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          >Meus pedidos</a
+        >
       </li>
     </ul>
     <ul class="auth-list">
       <li *ngIf="!(loggedIn$ | async)">
-        <a routerLink="/login" routerLinkActive="active">Login</a>
+        <a routerLink="/login" routerLinkActive="active">Entrar</a>
       </li>
       <li *ngIf="!(loggedIn$ | async)">
-        <a routerLink="/register" routerLinkActive="active">Registrar</a>
+        <a routerLink="/register" class="button"
+          >Criar conta <span aria-hidden="true">↗</span></a
+        >
       </li>
-      <li *ngIf="loggedIn$ | async" class="logout-item">
-        <button type="button" (click)="logout()">Sair</button>
+      <li *ngIf="loggedIn$ | async">
+        <button type="button" class="secondary logout" (click)="logout()">
+          Sair da conta
+        </button>
       </li>
     </ul>
   </nav>

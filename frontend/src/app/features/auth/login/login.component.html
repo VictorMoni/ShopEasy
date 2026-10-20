@@ -1,44 +1,68 @@
-<section class="auth-container">
-  <h2>Login</h2>
+<div class="auth-layout">
+  <aside class="auth-story">
+    <span class="eyebrow">BEM-VINDO À SHOPEASY</span>
+    <h1>Menos complicação.<br />Mais boas escolhas.</h1>
+    <p>
+      Explore o catálogo, monte seu pedido e acompanhe cada compra em um só
+      espaço.
+    </p>
+    <span class="story-mark" aria-hidden="true">se.</span>
+  </aside>
+  <section class="auth-container">
+    <span class="eyebrow">Que bom ter você de volta</span>
+    <h2>Entre na sua conta.</h2>
+    <p>Seus produtos e pedidos, em um só lugar.</p>
 
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="username">Usuário:</label>
-      <input id="username" formControlName="username" />
-      <div
-        class="validation-error"
-        *ngIf="
-          loginForm.get('username')?.invalid &&
-          loginForm.get('username')?.touched
-        "
-      >
-        Usuário é obrigatório.
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Usuário</label>
+        <input
+          id="username"
+          autocomplete="username"
+          placeholder="Seu nome de usuário"
+          formControlName="username"
+        />
+        <div
+          class="validation-error"
+          *ngIf="
+            loginForm.get('username')?.invalid &&
+            loginForm.get('username')?.touched
+          "
+        >
+          Usuário é obrigatório.
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="password">Senha:</label>
-      <input id="password" type="password" formControlName="password" />
-      <div
-        class="validation-error"
-        *ngIf="
-          loginForm.get('password')?.invalid &&
-          loginForm.get('password')?.touched
-        "
-      >
-        Senha é obrigatória.
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Sua senha"
+          formControlName="password"
+        />
+        <div
+          class="validation-error"
+          *ngIf="
+            loginForm.get('password')?.invalid &&
+            loginForm.get('password')?.touched
+          "
+        >
+          Senha é obrigatória.
+        </div>
       </div>
-    </div>
 
-    <button type="submit" [disabled]="loginForm.invalid || loading">
-      {{ loading ? "Entrando..." : "Entrar" }}
-    </button>
+      <button type="submit" [disabled]="loginForm.invalid || loading">
+        {{ loading ? "Entrando..." : "Entrar" }}
+      </button>
 
-    <p *ngIf="error" class="error-message">{{ error }}</p>
-  </form>
+      <p *ngIf="error" class="error-message">{{ error }}</p>
+    </form>
 
-  <p class="redirect">
-    Ainda não tem conta?
-    <a routerLink="/register">Registre-se</a>
-  </p>
-</section>
+    <p class="redirect">
+      Ainda não tem conta?
+      <a routerLink="/register">Registre-se</a>
+    </p>
+  </section>
+</div>

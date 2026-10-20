@@ -12,34 +12,41 @@
       <div><strong>ID do Pedido:</strong> {{ order.id }}</div>
       <div>
         <strong>Criado em:</strong>
-        {{ order.createdAt | date : "dd/MM/yyyy HH:mm:ss" }}
+        {{ order.createdAt | date: "dd/MM/yyyy HH:mm:ss" }}
       </div>
       <div>
         <strong>Total (R$):</strong>
-        {{ order.total | number : "1.2-2" }}
+        {{ order.total | number: "1.2-2" }}
       </div>
     </div>
 
     <h3>Itens</h3>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Produto</th>
-          <th>Quantidade</th>
-          <th>Preço Unitário (R$)</th>
-          <th>Subtotal (R$)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of order.items">
-          <td>{{ item.productName }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>{{ item.unitPrice | number : "1.2-2" }}</td>
-          <td>{{ getItemSubtotal(item) | number : "1.2-2" }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div
+      class="table-scroll"
+      role="region"
+      aria-label="Itens do pedido"
+      tabindex="0"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Preço Unitário (R$)</th>
+            <th>Subtotal (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of order.items">
+            <td>{{ item.productName }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unitPrice | number: "1.2-2" }}</td>
+            <td>{{ getItemSubtotal(item) | number: "1.2-2" }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <button type="button" (click)="goBack()">« Voltar para Meus Pedidos</button>
   </div>

@@ -1,73 +1,108 @@
 <div class="product-list-container">
-  <h2>Produtos</h2>
-
-  <div *ngIf="isAdmin" class="create-button">
-    <button routerLink="/products/create">Criar Novo Produto</button>
-  </div>
-
-  <div class="filters-container">
-    <input
-      type="text"
-      placeholder="Pesquisar por nome"
-      [(ngModel)]="filterName"
-      (keyup.enter)="onSearch()"
-    />
-
-    <input
-      type="text"
-      placeholder="Categoria"
-      [(ngModel)]="filterCategory"
-      (keyup.enter)="onSearch()"
-    />
-
-    <input
-      type="number"
-      placeholder="Preço mínimo"
-      [(ngModel)]="filterMinPrice"
-      (keyup.enter)="onSearch()"
-      min="0"
-    />
-
-    <input
-      type="number"
-      placeholder="Preço máximo"
-      [(ngModel)]="filterMaxPrice"
-      (keyup.enter)="onSearch()"
-      min="0"
-    />
-
-    <button (click)="onSearch()">Pesquisar</button>
-    <button (click)="clearFilters()">Limpar</button>
-  </div>
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">ESCOLHAS PARA O SEU DIA</span>
+      <h2>Encontre o seu próximo favorito.</h2>
+      <p>Explore o catálogo e escolha o que combina com você.</p>
+    </div>
+    <a *ngIf="isAdmin" routerLink="/products/create" class="button"
+      >+ Novo produto</a
+    >
+  </header>
+  <form
+    class="filters-container"
+    (ngSubmit)="onSearch()"
+    aria-label="Filtrar produtos"
+  >
+    <label
+      ><span>O que você procura?</span
+      ><input
+        type="search"
+        name="search"
+        placeholder="Pesquisar produto..."
+        [(ngModel)]="filterName"
+    /></label>
+    <label
+      ><span>Categoria</span
+      ><input
+        name="category"
+        placeholder="Todas as categorias"
+        [(ngModel)]="filterCategory"
+    /></label>
+    <label
+      ><span>Preço mínimo</span
+      ><input
+        type="number"
+        name="minPrice"
+        placeholder="R$ 0,00"
+        [(ngModel)]="filterMinPrice"
+        min="0"
+    /></label>
+    <label
+      ><span>Preço máximo</span
+      ><input
+        type="number"
+        name="maxPrice"
+        placeholder="Sem limite"
+        [(ngModel)]="filterMaxPrice"
+        min="0"
+    /></label>
+    <button type="submit">Buscar</button
+    ><button type="button" class="secondary" (click)="clearFilters()">
+      Limpar
+    </button>
+  </form>
 
   <div *ngIf="loading" class="loading">Carregando produtos...</div>
   <div *ngIf="error" class="error-message">{{ error }}</div>
 
-  <table *ngIf="!loading && !error && products.length > 0">
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Preço (R$)</th>
-        <th>Estoque</th>
-        <th>Categoria</th>
-        <th>Detalhes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let produto of products">
-        <td>{{ produto.name }}</td>
-        <td>{{ produto.price | number : "1.2-2" }}</td>
-        <td>{{ produto.stock }}</td>
-        <td>{{ produto.category }}</td>
-        <td>
-          <a [routerLink]="['/products', produto.id]">Ver Detalhes</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="catalog-heading" *ngIf="!loading && !error && products.length">
+    <h3>Todos os produtos</h3>
+    <span>{{ totalElements }} resultado(s)</span>
+  </div>
+  <div class="product-grid" *ngIf="!loading && !error && products.length > 0">
+    <article
+      class="product-card"
+      *ngFor="let produto of products; let i = index"
+    >
+      <a
+        class="product-visual"
+        [class.alternate]="i % 2 === 1"
+        [routerLink]="['/products', produto.id]"
+        [attr.aria-label]="'Ver ' + produto.name"
+        ><span class="product-monogram" aria-hidden="true">{{
+          produto.name.slice(0, 1).toUpperCase()
+        }}</span
+        ><span class="visual-label">{{
+          produto.category || "ShopEasy"
+        }}</span></a
+      >
+      <div class="product-card-body">
+        <span class="product-category">{{
+          produto.category || "Coleção ShopEasy"
+        }}</span>
+        <h3>
+          <a [routerLink]="['/products', produto.id]">{{ produto.name }}</a>
+        </h3>
+        <p>{{ produto.description || "Conheça os detalhes deste produto." }}</p>
+        <div class="product-price-row">
+          <strong>{{
+            produto.price | currency: "BRL" : "symbol" : "1.2-2" : "pt-BR"
+          }}</strong
+          ><span class="stock" [class.unavailable]="produto.stock === 0">{{
+            produto.stock > 0 ? "Em estoque" : "Indisponível"
+          }}</span>
+        </div>
+        <a class="product-link" [routerLink]="['/products', produto.id]"
+          >Ver produto <span aria-hidden="true">↗</span></a
+        >
+      </div>
+    </article>
+  </div>
 
   <div *ngIf="!loading && !error && products.length === 0" class="empty-list">
-    Nenhum produto encontrado para os filtros/página atual.
+    <strong>Nenhum produto por aqui.</strong>Experimente outro nome ou limpe os
+    filtros para explorar o catálogo.
   </div>
 
   <div *ngIf="!loading && !error && totalElements > size" class="pagination">
