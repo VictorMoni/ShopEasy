@@ -9,6 +9,7 @@
 - The Angular interceptor only sends bearer tokens to the configured API origin and `/api/` paths.
 - Nested order item validation rejects non-positive quantities; orders have at most 50 lines. Product/order page sizes are limited to 100, with allowlisted order sort fields.
 - Unexpected errors return a generic message. Authorization failures return 403.
+- The public static site sends CSP frame-ancestors/object-src/base-uri restrictions, nosniff and a strict-origin referrer policy. These were configured in Render and verified on the public HTTP response. This is not a complete script-src CSP.
 - Hosted Swagger/API docs are disabled; only actuator health remains public. Public ADMIN registration stays disabled on hosting.
 - A bounded in-memory guard limits authentication POSTs to 60/minute per remote address per instance. It ignores spoofable forwarded headers. A proxy may group customers under one remote address, and restarts reset counters.
 - Six clearly marked demo products use bundled original SVG illustrations. The hosted initializer inserts only missing demo names and never creates accounts or overwrites existing products.

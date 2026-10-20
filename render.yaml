@@ -42,3 +42,13 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
