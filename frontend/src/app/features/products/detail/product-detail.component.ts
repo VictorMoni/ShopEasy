@@ -1,3 +1,4 @@
+import { createProductForm } from '../form/product-form.factory';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product.service';
@@ -5,12 +6,7 @@ import { Product, ProductRequest } from '../product.model';
 import { AuthService } from '../../../features/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-detail',
@@ -35,7 +31,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private productService: ProductService,
     private authService: AuthService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {}
 
   ngOnInit(): void {
@@ -51,12 +47,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
     this.loadProduct();
 
-    this.productForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', Validators.maxLength(1000)],
-      price: [0, [Validators.required, Validators.min(0)]],
-      stock: [0, [Validators.required, Validators.min(0)]],
-    });
+    this.productForm = createProductForm(this.fb);
   }
 
   loadProduct(): void {

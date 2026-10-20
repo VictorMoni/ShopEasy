@@ -1,10 +1,6 @@
+import { createProductForm } from './product-form.factory';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormGroup, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProductRequest } from '../product.model';
 
@@ -25,24 +21,7 @@ export class ProductFormComponent implements OnInit {
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    this.productForm = this.fb.group({
-      name: [
-        this.initialData?.name ?? '',
-        [Validators.required, Validators.maxLength(100)],
-      ],
-      description: [
-        this.initialData?.description ?? '',
-        Validators.maxLength(1000),
-      ],
-      price: [
-        this.initialData?.price ?? 0,
-        [Validators.required, Validators.min(0)],
-      ],
-      stock: [
-        this.initialData?.stock ?? 0,
-        [Validators.required, Validators.min(0)],
-      ],
-    });
+    this.productForm = createProductForm(this.fb, this.initialData);
   }
 
   onSubmit(): void {

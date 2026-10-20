@@ -57,8 +57,7 @@ public class OrderController implements OrderApi {
         String username = userDetails.getUsername();
         log.info("📄 Listando pedidos do usuário: {}", username);
 
-        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = orderPage(page, size, sortBy, direction);
 
         return ResponseEntity.ok(orderService.findByUser(username, pageable));
     }
@@ -81,8 +80,7 @@ public class OrderController implements OrderApi {
             @RequestParam(defaultValue = "desc") String direction) {
 
         log.info("📊 Listando pedidos com status: {}", status);
-        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = orderPage(page, size, sortBy, direction);
 
         return ResponseEntity.ok(orderService.findByStatus(status, pageable));
     }
@@ -119,5 +117,11 @@ public class OrderController implements OrderApi {
         log.warn("❌ Excluindo pedido com ID: {}", id);
         orderService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private Pageable orderPage(int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        return PageRequest.of(page, size, sort);
     }
 }

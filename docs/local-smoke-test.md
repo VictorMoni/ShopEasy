@@ -36,3 +36,9 @@ uses the real producer and embedded broker.
 This validates the real HTTP/JPA/authentication/order flow with H2. It does not
 validate MySQL behavior, Docker orchestration, external Kafka consumers or a
 production deployment.
+
+## Refactoring regression checks
+
+The catalog and order composer share the product-filter component and its filter model. Product creation, editing and the standalone form share a form factory. Order endpoints share their pagination/sort construction. Existing defaults, validators, request arguments, labels and routes are preserved.
+
+Validation: 23 targeted frontend tests, 9 backend unit tests and the production frontend build passed. Browser checks covered search, clearing filters, cart submission and a persisted two-unit order totaling BRL 79.80. Stale product-form tests were aligned with the existing zero defaults and saved output event before refactoring.

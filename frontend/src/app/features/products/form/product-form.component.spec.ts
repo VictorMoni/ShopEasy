@@ -1,16 +1,12 @@
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
   waitForAsync,
 } from '@angular/core/testing';
 import { ProductFormComponent } from './product-form.component';
 import { ProductService } from '../product.service';
-import { ProductRequest } from '../product.model';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { By } from '@angular/platform-browser';
 
@@ -33,7 +29,7 @@ describe('ProductFormComponent', () => {
     }).compileComponents();
 
     productServiceSpy = TestBed.inject(
-      ProductService
+      ProductService,
     ) as jasmine.SpyObj<ProductService>;
     routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
 
@@ -51,8 +47,8 @@ describe('ProductFormComponent', () => {
     expect(form.valid).toBeFalse();
     expect(form.get('name')?.value).toBe('');
     expect(form.get('description')?.value).toBe('');
-    expect(form.get('price')?.value).toBeNull();
-    expect(form.get('stock')?.value).toBeNull();
+    expect(form.get('price')?.value).toBe(0);
+    expect(form.get('stock')?.value).toBe(0);
   });
 
   it('campo "name" deve ser obrigatório e ter no máximo 100 caracteres', () => {
@@ -114,56 +110,43 @@ describe('ProductFormComponent', () => {
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
-  it('onSubmit deve chamar service.create e navegar em caso de sucesso', fakeAsync(() => {
-    component.productForm.setValue({
+  it('onSubmit deve emitir os dados válidos sem chamar serviços ou navegar', () => {
+    const value = {
       name: 'Produto X',
       description: 'Descrição X',
       price: 75,
       stock: 20,
-    });
-    expect(component.productForm.valid).toBeTrue();
-
-    productServiceSpy.create.and.returnValue(of({} as any));
-
+    };
+    component.productForm.setValue(value);
+    const saved = spyOn(component.saved, 'emit');
     component.onSubmit();
-    tick();
-    expect(productServiceSpy.create).toHaveBeenCalledWith({
-      name: 'Produto X',
-      description: 'Descrição X',
-      price: 75,
-      stock: 20,
-    } as ProductRequest);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/products']);
-  }));
+    expect(saved).toHaveBeenCalledOnceWith(value);
+    expect(productServiceSpy.create).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
 
-  it('onSubmit deve setar error quando service.create falhar', fakeAsync(() => {
-    component.productForm.setValue({
+  it('deve preencher os valores iniciais recebidos para edição', () => {
+    const value = {
       name: 'Produto Y',
       description: 'Descrição Y',
       price: 50,
       stock: 5,
-    });
-    expect(component.productForm.valid).toBeTrue();
-
-    productServiceSpy.create.and.returnValue(throwError({ status: 500 }));
-
-    component.onSubmit();
-    tick();
-    expect(productServiceSpy.create).toHaveBeenCalled();
-    expect(component.error).toBe('Erro ao criar produto. Verifique os dados.');
-    expect(routerSpy.navigate).not.toHaveBeenCalled();
-  }));
+    };
+    component.initialData = value;
+    component.ngOnInit();
+    expect(component.productForm.value).toEqual(value);
+  });
 
   it('template não deve exibir mensagem de erro inicialmente', () => {
     fixture.detectChanges();
-    const errorElem = fixture.debugElement.query(By.css('p.error'));
+    const errorElem = fixture.debugElement.query(By.css('p.error-message'));
     expect(errorElem).toBeNull();
   });
 
   it('template deve exibir mensagem de erro quando component.error for definido', () => {
     component.error = 'Falha no servidor';
     fixture.detectChanges();
-    const errorElem = fixture.debugElement.query(By.css('p.error'));
+    const errorElem = fixture.debugElement.query(By.css('p.error-message'));
     expect(errorElem).toBeTruthy();
     expect(errorElem.nativeElement.textContent).toContain('Falha no servidor');
   });

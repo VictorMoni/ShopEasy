@@ -9,49 +9,11 @@
       >+ Novo produto</a
     >
   </header>
-  <form
-    class="filters-container"
-    (ngSubmit)="onSearch()"
-    aria-label="Filtrar produtos"
-  >
-    <label
-      ><span>O que você procura?</span
-      ><input
-        type="search"
-        name="search"
-        placeholder="Pesquisar produto..."
-        [(ngModel)]="filterName"
-    /></label>
-    <label
-      ><span>Categoria</span
-      ><input
-        name="category"
-        placeholder="Todas as categorias"
-        [(ngModel)]="filterCategory"
-    /></label>
-    <label
-      ><span>Preço mínimo</span
-      ><input
-        type="number"
-        name="minPrice"
-        placeholder="R$ 0,00"
-        [(ngModel)]="filterMinPrice"
-        min="0"
-    /></label>
-    <label
-      ><span>Preço máximo</span
-      ><input
-        type="number"
-        name="maxPrice"
-        placeholder="Sem limite"
-        [(ngModel)]="filterMaxPrice"
-        min="0"
-    /></label>
-    <button type="submit">Buscar</button
-    ><button type="button" class="secondary" (click)="clearFilters()">
-      Limpar
-    </button>
-  </form>
+  <app-product-filters
+    [filters]="filters"
+    (searchRequested)="onSearch()"
+    (clearRequested)="clearFilters()"
+  />
 
   <div *ngIf="loading" class="loading">Carregando produtos...</div>
   <div *ngIf="error" class="error-message">{{ error }}</div>

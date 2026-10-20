@@ -138,4 +138,51 @@ describe('ProductListComponent', () => {
     fixture.detectChanges();
     expect(component.products[0].name).toBe('Produto Z');
   });
+
+  it('deve enviar os filtros digitados e reiniciar a página ao buscar', async () => {
+    await fixture.whenStable();
+    const input = fixture.debugElement.query(By.css('input[name="search"]'))
+      .nativeElement as HTMLInputElement;
+    input.value = 'Caderno';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    component.page = 2;
+    fixture.debugElement
+      .query(By.css('form.filters-container'))
+      .triggerEventHandler('ngSubmit', null);
+    expect(productServiceSpy.list).toHaveBeenCalledWith(
+      'Caderno',
+      '',
+      undefined,
+      undefined,
+      0,
+      10,
+    );
+  });
+
+  it('deve limpar os filtros pela interface e recarregar a primeira página', async () => {
+    await fixture.whenStable();
+    const input = fixture.debugElement.query(By.css('input[name="search"]'))
+      .nativeElement as HTMLInputElement;
+    input.value = 'Caderno';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    component.page = 2;
+    fixture.debugElement
+      .query(By.css('form.filters-container button[type="button"]'))
+      .nativeElement.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(input.value).toBe('');
+    expect(productServiceSpy.list).toHaveBeenCalledWith(
+      '',
+      '',
+      undefined,
+      undefined,
+      0,
+      10,
+    );
+  });
 });

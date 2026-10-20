@@ -1,3 +1,5 @@
+import { ProductFiltersComponent } from '../filters/product-filters.component';
+import { emptyProductFilters } from '../filters/product-filters.model';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProductService } from '../product.service';
 import { CommonModule } from '@angular/common';
@@ -5,14 +7,13 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../features/auth/auth.service';
 import { Subscription } from 'rxjs';
 import { PageProductResponse, ProductResponse } from '../product.model';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, ProductFiltersComponent],
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   products: ProductResponse[] = [];
@@ -22,10 +23,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
   // filtros
-  filterName: string = '';
-  filterCategory: string = '';
-  filterMinPrice: number | undefined = undefined;
-  filterMaxPrice: number | undefined = undefined;
+  filters = emptyProductFilters();
 
   // paginação
   page: number = 0;
@@ -35,7 +33,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   constructor(
     private productService: ProductService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -53,12 +51,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     this.productService
       .list(
-        this.filterName,
-        this.filterCategory,
-        this.filterMinPrice,
-        this.filterMaxPrice,
+        this.filters.name,
+        this.filters.category,
+        this.filters.minPrice,
+        this.filters.maxPrice,
         this.page,
-        this.size
+        this.size,
       )
       .subscribe({
         next: (pageData: PageProductResponse) => {
@@ -82,10 +80,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   /** limpa todos os filtros e recarrega desde a página zero */
   clearFilters(): void {
-    this.filterName = '';
-    this.filterCategory = '';
-    this.filterMinPrice = undefined;
-    this.filterMaxPrice = undefined;
+    this.filters = emptyProductFilters();
     this.page = 0;
     this.loadProducts();
   }
