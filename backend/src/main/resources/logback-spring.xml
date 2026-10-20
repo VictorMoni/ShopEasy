@@ -25,7 +25,7 @@
     </springProfile>
 
     <!-- Para outros profiles (test, test-mysql, etc), só Console -->
-    <springProfile name="default,test,test-mysql">
+    <springProfile name="default,test,test-mysql,hosting">
         <root level="INFO">
             <appender-ref ref="CONSOLE" />
         </root>
