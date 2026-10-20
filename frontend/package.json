@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "build:hosting": "node scripts/build-hosting.mjs"
   },
   "private": true,
   "dependencies": {

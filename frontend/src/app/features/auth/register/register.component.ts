@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import {
   FormControl,
@@ -17,12 +18,16 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
 export class RegisterComponent implements OnInit {
+  readonly allowAdminRegistration = environment.allowAdminRegistration;
   registerForm!: FormGroup;
   error: string | null = null;
   success: string | null = null;
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.registerForm = new FormGroup({

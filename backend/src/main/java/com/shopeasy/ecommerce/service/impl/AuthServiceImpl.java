@@ -13,6 +13,7 @@ import com.shopeasy.ecommerce.security.CustomUserDetailsService;
 import com.shopeasy.ecommerce.security.JwtUtil;
 import com.shopeasy.ecommerce.service.AuthService;
 import com.shopeasy.ecommerce.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+
+    @Value("${app.registration.allow-admin:true}")
+    private boolean allowAdminRegistration = true;
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -81,6 +85,9 @@ public class AuthServiceImpl implements AuthService {
         String username = request.getUsername();
         String password = request.getPassword();
         Role role = Role.valueOf(request.getRole().toUpperCase());
+        if (!allowAdminRegistration && role == Role.ADMIN) {
+            throw new BusinessException("Cadastro público de administrador não permitido");
+        }
 
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new BusinessException("Usuário e senha são obrigatórios");

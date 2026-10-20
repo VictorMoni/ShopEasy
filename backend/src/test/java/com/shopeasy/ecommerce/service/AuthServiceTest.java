@@ -150,4 +150,11 @@ class AuthServiceTest {
 
         assertEquals("Usuário e senha são obrigatórios", ex.getMessage());
     }
+    @Test
+    void hostingMustRejectPublicAdminRegistration() {
+        org.springframework.test.util.ReflectionTestUtils.setField(authService, "allowAdminRegistration", false);
+        var request = new RegisterRequest("public-admin", "unused-test-password", "ADMIN");
+        assertThrows(BusinessException.class, () -> authService.register(request));
+        org.mockito.Mockito.verifyNoInteractions(userService, passwordEncoder);
+    }
 }
