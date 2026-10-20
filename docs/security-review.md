@@ -26,4 +26,8 @@ References:
 
 Dependency validation: Angular framework aligned to 20.3.34 and tooling updated within Angular 20. The final npm production audit (`npm audit --omit=dev`) reported zero known vulnerabilities. The full development dependency tree still has nine high-severity advisories; resolving those requires a separately tested tooling migration. Production audit results do not cover Java dependencies or unknown vulnerabilities.
 
-Local validation: 21 backend tests and 22 focused frontend tests passed; the hosting Angular production build was checked separately.
+Local validation: 22 distinct backend tests and 22 focused frontend tests passed; the hosting Angular production build passed (422.62 kB initial bundle).
+
+The hosted database enforces primary keys. Order and item IDs now use a keyed TABLE generator rather than keyless implicit sequence tables. The hosted initializer advances the counters to preserve existing IDs; the database protection remains enabled. Local order persistence tests passed.
+
+Public verification passed 13 checks: six catalog products and their SVG assets, separate access/refresh token validation, valid refresh, customer denial on product creation/Kafka publishing, negative quantities, excessive pagination, creation of demo order 2, owner access, cross-customer denial and blocked public ADMIN registration. Render logs confirmed receipt of order 2 in Kafka. Static-site security response headers were also verified. No personal accounts were used for these tests.
