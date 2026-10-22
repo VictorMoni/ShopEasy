@@ -1,5 +1,8 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../testing/mocks';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { of } from 'rxjs';
 import { AppComponent } from './app.component';
@@ -17,20 +20,20 @@ class HeaderStubComponent {
 describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
   let component: AppComponent;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let authServiceSpy: Mocked<AuthService>;
 
-  beforeEach(waitForAsync(() => {
-    const spy = jasmine.createSpyObj('AuthService', [], {
+  beforeEach((async () => {
+    const spy = createMock('AuthService', [], {
       isLoggedIn$: of(false),
       isAdmin$: of(false),
     });
 
     TestBed.configureTestingModule({
       imports: [CommonModule, AppComponent, HeaderStubComponent],
-      providers: [{ provide: AuthService, useValue: spy }],
+      providers: [provideRouter([]), { provide: AuthService, useValue: spy }],
     }).compileComponents();
 
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authServiceSpy = TestBed.inject(AuthService) as Mocked<AuthService>;
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
   }));
@@ -39,7 +42,7 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit: quando isLoggedIn$ emitir true, deve chamar isAdmin$ e emitir seu valor', (done) => {
+  it('ngOnInit: quando isLoggedIn$ emitir true, deve chamar isAdmin$ e emitir seu valor', () => {
     authServiceSpy.isLoggedIn$ = of(true);
     authServiceSpy.isAdmin$ = of(true);
 
@@ -47,32 +50,16 @@ describe('AppComponent', () => {
     component.isAdmin$.subscribe((value) => {
       expect(authServiceSpy.isLoggedIn$).toBeDefined();
       expect(authServiceSpy.isAdmin$).toBeDefined();
-      expect(value).toBeTrue();
-      done();
+      expect(value).toBe(true);
     });
   });
 
-  it('ngOnInit: quando isLoggedIn$ emitir false, isAdmin$ não deve ser consultado nem emitir valor', (done) => {
+  it('emits non-admin for an anonymous visitor even when the role stream is stale', () => {
     authServiceSpy.isLoggedIn$ = of(false);
     authServiceSpy.isAdmin$ = of(true);
-
     component.ngOnInit();
-    let emitted = false;
-
-    const sub = component.isAdmin$.subscribe({
-      next: () => {
-        emitted = true;
-      },
-      complete: () => {
-        expect(emitted).toBeFalse();
-        done();
-      },
-    });
-
-    setTimeout(() => {
-      sub.unsubscribe();
-      expect(emitted).toBeFalse();
-      done();
-    }, 0);
+    const values: boolean[] = [];
+    component.isAdmin$.subscribe(value => values.push(value));
+    expect(values).toEqual([false]);
   });
 });

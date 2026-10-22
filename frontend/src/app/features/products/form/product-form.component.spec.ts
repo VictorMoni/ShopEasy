@@ -1,8 +1,9 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  waitForAsync,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { ProductFormComponent } from './product-form.component';
 import { ProductService } from '../product.service';
 import { Router } from '@angular/router';
@@ -13,12 +14,12 @@ import { By } from '@angular/platform-browser';
 describe('ProductFormComponent', () => {
   let component: ProductFormComponent;
   let fixture: ComponentFixture<ProductFormComponent>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let productServiceSpy: Mocked<ProductService>;
+  let routerSpy: Mocked<Router>;
 
-  beforeEach(waitForAsync(() => {
-    const prodSpy = jasmine.createSpyObj('ProductService', ['create']);
-    const rtrSpy = jasmine.createSpyObj('Router', ['navigate']);
+  beforeEach((async () => {
+    const prodSpy = createMock('ProductService', ['create']);
+    const rtrSpy = createMock('Router', ['navigate']);
 
     TestBed.configureTestingModule({
       imports: [CommonModule, ReactiveFormsModule, FormsModule],
@@ -30,8 +31,8 @@ describe('ProductFormComponent', () => {
 
     productServiceSpy = TestBed.inject(
       ProductService,
-    ) as jasmine.SpyObj<ProductService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    ) as Mocked<ProductService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
 
     fixture = TestBed.createComponent(ProductFormComponent);
     component = fixture.componentInstance;
@@ -44,7 +45,7 @@ describe('ProductFormComponent', () => {
 
   it('form deve ser inválido inicialmente', () => {
     const form = component.productForm;
-    expect(form.valid).toBeFalse();
+    expect(form.valid).toBe(false);
     expect(form.get('name')?.value).toBe('');
     expect(form.get('description')?.value).toBe('');
     expect(form.get('price')?.value).toBe(0);
@@ -54,54 +55,54 @@ describe('ProductFormComponent', () => {
   it('campo "name" deve ser obrigatório e ter no máximo 100 caracteres', () => {
     const nameControl = component.productForm.get('name')!;
     nameControl.setValue('');
-    expect(nameControl.hasError('required')).toBeTrue();
+    expect(nameControl.hasError('required')).toBe(true);
 
     const longString = 'a'.repeat(101);
     nameControl.setValue(longString);
-    expect(nameControl.hasError('maxlength')).toBeTrue();
+    expect(nameControl.hasError('maxlength')).toBe(true);
 
     nameControl.setValue('Nome válido');
-    expect(nameControl.valid).toBeTrue();
+    expect(nameControl.valid).toBe(true);
   });
 
   it('campo "description" deve ter no máximo 1000 caracteres', () => {
     const descControl = component.productForm.get('description')!;
     const longDesc = 'a'.repeat(1001);
     descControl.setValue(longDesc);
-    expect(descControl.hasError('maxlength')).toBeTrue();
+    expect(descControl.hasError('maxlength')).toBe(true);
 
     descControl.setValue('Descrição aceitável');
-    expect(descControl.valid).toBeTrue();
+    expect(descControl.valid).toBe(true);
   });
 
   it('campo "price" deve ser obrigatório e maior ou igual a zero', () => {
     const priceControl = component.productForm.get('price')!;
     priceControl.setValue(null);
-    expect(priceControl.hasError('required')).toBeTrue();
+    expect(priceControl.hasError('required')).toBe(true);
 
     priceControl.setValue(-10);
-    expect(priceControl.hasError('min')).toBeTrue();
+    expect(priceControl.hasError('min')).toBe(true);
 
     priceControl.setValue(0);
-    expect(priceControl.valid).toBeTrue();
+    expect(priceControl.valid).toBe(true);
 
     priceControl.setValue(25.5);
-    expect(priceControl.valid).toBeTrue();
+    expect(priceControl.valid).toBe(true);
   });
 
   it('campo "stock" deve ser obrigatório e maior ou igual a zero', () => {
     const stockControl = component.productForm.get('stock')!;
     stockControl.setValue(null);
-    expect(stockControl.hasError('required')).toBeTrue();
+    expect(stockControl.hasError('required')).toBe(true);
 
     stockControl.setValue(-5);
-    expect(stockControl.hasError('min')).toBeTrue();
+    expect(stockControl.hasError('min')).toBe(true);
 
     stockControl.setValue(0);
-    expect(stockControl.valid).toBeTrue();
+    expect(stockControl.valid).toBe(true);
 
     stockControl.setValue(10);
-    expect(stockControl.valid).toBeTrue();
+    expect(stockControl.valid).toBe(true);
   });
 
   it('onSubmit não deve chamar service.create se form for inválido', () => {
@@ -118,9 +119,9 @@ describe('ProductFormComponent', () => {
       stock: 20,
     };
     component.productForm.setValue(value);
-    const saved = spyOn(component.saved, 'emit');
+    const saved = vi.spyOn(component.saved, 'emit');
     component.onSubmit();
-    expect(saved).toHaveBeenCalledOnceWith(value);
+    expect(saved).toHaveBeenCalledExactlyOnceWith(value);
     expect(productServiceSpy.create).not.toHaveBeenCalled();
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });

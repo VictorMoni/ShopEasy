@@ -1,3 +1,5 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../testing/mocks';
 // src/app/features/orders/order.service.spec.ts
 
 import { TestBed } from '@angular/core/testing';
@@ -10,12 +12,12 @@ import { environment } from '../../../environments/environment';
 
 describe('OrderService', () => {
   let service: OrderService;
-  let httpSpy: jasmine.SpyObj<HttpClient>;
+  let httpSpy: Mocked<HttpClient>;
 
   const baseUrl = `${environment.apiUrl}/api/orders`;
 
   beforeEach(() => {
-    httpSpy = jasmine.createSpyObj('HttpClient', ['post', 'get']);
+    httpSpy = createMock('HttpClient', ['post', 'get']);
 
     TestBed.configureTestingModule({
       providers: [OrderService, { provide: HttpClient, useValue: httpSpy }],
@@ -54,7 +56,7 @@ describe('OrderService', () => {
         },
       ],
     };
-    httpSpy.post.and.returnValue(of(mockResponse));
+    httpSpy.post.mockReturnValue(of(mockResponse));
 
     let result: OrderResponse | undefined;
     service.create(orderReq).subscribe((res) => (result = res));
@@ -76,7 +78,7 @@ describe('OrderService', () => {
       totalElements: 1,
     };
     const expectedUrl = `${baseUrl}/me?page=0&size=10`;
-    httpSpy.get.and.returnValue(of(mockPage));
+    httpSpy.get.mockReturnValue(of(mockPage));
 
     let result: typeof mockPage | undefined;
     service.listMyOrders().subscribe((res) => (result = res));
@@ -93,7 +95,7 @@ describe('OrderService', () => {
     const page = 2;
     const size = 5;
     const expectedUrl = `${baseUrl}/me?page=${page}&size=${size}`;
-    httpSpy.get.and.returnValue(of(mockPage));
+    httpSpy.get.mockReturnValue(of(mockPage));
 
     let result: typeof mockPage | undefined;
     service.listMyOrders(page, size).subscribe((res) => (result = res));
@@ -111,7 +113,7 @@ describe('OrderService', () => {
     };
     const id = 99;
     const expectedUrl = `${baseUrl}/${id}`;
-    httpSpy.get.and.returnValue(of(mockOrder));
+    httpSpy.get.mockReturnValue(of(mockOrder));
 
     let result: OrderResponse | undefined;
     service.getOrderById(id).subscribe((res) => (result = res));

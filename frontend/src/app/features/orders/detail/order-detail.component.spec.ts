@@ -1,10 +1,9 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -16,8 +15,8 @@ import { OrderResponse, OrderItemResponse } from '../order.model';
 describe('OrderDetailComponent', () => {
   let component: OrderDetailComponent;
   let fixture: ComponentFixture<OrderDetailComponent>;
-  let orderServiceSpy: jasmine.SpyObj<OrderService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let orderServiceSpy: Mocked<OrderService>;
+  let routerSpy: Mocked<Router>;
 
   const mockOrder: OrderResponse = {
     id: 5,
@@ -43,9 +42,9 @@ describe('OrderDetailComponent', () => {
     ],
   };
 
-  beforeEach(waitForAsync(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['getOrderById']);
-    const rtrSpy = jasmine.createSpyObj('Router', ['navigate']);
+  beforeEach((async () => {
+    const orderSpy = createMock('OrderService', ['getOrderById']);
+    const rtrSpy = createMock('Router', ['navigate']);
 
     const routeStub = {
       snapshot: {
@@ -66,23 +65,23 @@ describe('OrderDetailComponent', () => {
 
     orderServiceSpy = TestBed.inject(
       OrderService
-    ) as jasmine.SpyObj<OrderService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    ) as Mocked<OrderService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
 
-    orderServiceSpy.getOrderById.and.returnValue(of(mockOrder));
+    orderServiceSpy.getOrderById.mockReturnValue(of(mockOrder));
 
     fixture = TestBed.createComponent(OrderDetailComponent);
     component = fixture.componentInstance;
   }));
 
-  it('deve criar o componente e carregar pedido válido', fakeAsync(() => {
+  it('deve criar o componente e carregar pedido válido', (async () => {
     fixture.detectChanges();
     expect(component.orderId).toBe(5);
     expect(orderServiceSpy.getOrderById).toHaveBeenCalledWith(5);
 
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     expect(component.order).toEqual(mockOrder);
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
     expect(component.error).toBeNull();
   }));
 
@@ -94,7 +93,7 @@ describe('OrderDetailComponent', () => {
         },
       },
     };
-    TestBed.overrideProvider(ActivatedRoute, { useValue: routeStubInvalid });
+    Object.assign(TestBed.inject(ActivatedRoute), routeStubInvalid);
 
     fixture = TestBed.createComponent(OrderDetailComponent);
     component = fixture.componentInstance;
@@ -104,45 +103,45 @@ describe('OrderDetailComponent', () => {
     expect(orderServiceSpy.getOrderById).not.toHaveBeenCalled();
   });
 
-  it('loadOrder com erro 404 deve exibir "Pedido não encontrado."', fakeAsync(() => {
-    orderServiceSpy.getOrderById.and.returnValue(
+  it('loadOrder com erro 404 deve exibir "Pedido não encontrado."', (async () => {
+    orderServiceSpy.getOrderById.mockReturnValue(
       throwError(() => ({ status: 404 }))
     );
 
     fixture.detectChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.error).toBe('Pedido não encontrado.');
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   }));
 
-  it('loadOrder com erro 403 deve exibir "Você não tem permissão para ver esse pedido."', fakeAsync(() => {
-    orderServiceSpy.getOrderById.and.returnValue(
+  it('loadOrder com erro 403 deve exibir "Você não tem permissão para ver este pedido."', (async () => {
+    orderServiceSpy.getOrderById.mockReturnValue(
       throwError(() => ({ status: 403 }))
     );
 
     fixture.detectChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.error).toBe(
-      'Você não tem permissão para ver esse pedido.'
+      'Você não tem permissão para ver este pedido.'
     );
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   }));
 
-  it('loadOrder com outro erro deve exibir "Erro ao carregar pedido."', fakeAsync(() => {
-    orderServiceSpy.getOrderById.and.returnValue(
+  it('loadOrder com outro erro deve exibir "Erro ao carregar pedido."', (async () => {
+    orderServiceSpy.getOrderById.mockReturnValue(
       throwError(() => ({ status: 500 }))
     );
 
     fixture.detectChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.error).toBe('Erro ao carregar pedido.');
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   }));
 
   it('getItemSubtotal deve retornar unitPrice * quantity', () => {

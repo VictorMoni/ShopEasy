@@ -1,4 +1,6 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../testing/mocks';
+import { TestBed, tick } from '@angular/core/testing';
 import { AuthService } from './auth.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -6,8 +8,8 @@ import { of, throwError } from 'rxjs';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let httpSpy: jasmine.SpyObj<HttpClient>;
-  let jwtSpy: jasmine.SpyObj<JwtHelperService>;
+  let httpSpy: Mocked<HttpClient>;
+  let jwtSpy: Mocked<JwtHelperService>;
 
   const dummyAuthResponse = {
     accessToken: 'valid.token.here',
@@ -22,8 +24,8 @@ describe('AuthService', () => {
   beforeEach(() => {
     localStorage.clear();
 
-    httpSpy = jasmine.createSpyObj('HttpClient', ['post']);
-    jwtSpy = jasmine.createSpyObj('JwtHelperService', [
+    httpSpy = createMock('HttpClient', ['post']);
+    jwtSpy = createMock('JwtHelperService', [
       'isTokenExpired',
       'decodeToken',
     ]);
@@ -42,58 +44,92 @@ describe('AuthService', () => {
     localStorage.clear();
   });
 
-  it('deve limpar o estado se não houver token ou se token estiver expirado', fakeAsync(() => {
-    jwtSpy.isTokenExpired.and.returnValue(Promise.resolve(true));
+  it('deve limpar o estado se não houver token ou se token estiver expirado', (async () => {
+    jwtSpy.isTokenExpired = vi.fn().mockReturnValue(true);
 
     service = new AuthService(httpSpy, jwtSpy);
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(service.getToken()).toBeNull();
 
     let loggedIn = true;
     service.isLoggedIn$.subscribe((v) => (loggedIn = v));
-    expect(loggedIn!).toBeFalse();
+    expect(loggedIn!).toBe(false);
 
     let isAdmin = true;
     service.isAdmin$.subscribe((v) => (isAdmin = v));
-    expect(isAdmin!).toBeFalse();
+    expect(isAdmin!).toBe(false);
   }));
 
-  it('deve carregar usuário do token válido no construtor', fakeAsync(() => {
+  it('deve carregar usuário do token válido no construtor', (async () => {
     localStorage.setItem('accessToken', 'valid.token.here');
-    jwtSpy.isTokenExpired.and.returnValue(Promise.resolve(false));
-    jwtSpy.decodeToken.and.returnValue({ role: 'ADMIN' });
+    jwtSpy.isTokenExpired = vi.fn().mockReturnValue(false);
+    jwtSpy.decodeToken.mockReturnValue({ role: 'ADMIN', token_use: 'access' });
 
     service = new AuthService(httpSpy, jwtSpy);
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     let loggedInValue = false;
     service.isLoggedIn$.subscribe((v) => (loggedInValue = v));
-    expect(loggedInValue!).toBeTrue();
+    expect(loggedInValue!).toBe(true);
 
     let isAdminValue = false;
     service.isAdmin$.subscribe((v) => (isAdminValue = v));
-    expect(isAdminValue!).toBeTrue();
+    expect(isAdminValue!).toBe(true);
   }));
+
+  it.each([
+    { role: 'ADMIN' },
+    { role: 'ADMIN', token_use: 'refresh' },
+    null,
+  ])('clears a legacy or wrong-purpose stored token: %j', decoded => {
+    localStorage.setItem('accessToken', 'old-token');
+    localStorage.setItem('refreshToken', 'old-refresh');
+    jwtSpy.isTokenExpired = vi.fn().mockReturnValue(false);
+    jwtSpy.decodeToken.mockReturnValue(decoded);
+    const restored = new AuthService(httpSpy, jwtSpy);
+    let loggedIn = true;
+    restored.isLoggedIn$.subscribe(value => loggedIn = value);
+    expect(loggedIn).toBe(false);
+    expect(restored.getToken()).toBeNull();
+    expect(restored.getRefreshToken()).toBeNull();
+  });
+
+  it('clears malformed stored tokens without breaking application startup', () => {
+    localStorage.setItem('accessToken', 'malformed');
+    jwtSpy.isTokenExpired.mockImplementation(() => { throw new Error('Invalid JWT'); });
+    expect(() => new AuthService(httpSpy, jwtSpy)).not.toThrow();
+    expect(localStorage.getItem('accessToken')).toBeNull();
+  });
+
+  it('preserves an admin role array after refresh', async () => {
+    localStorage.setItem('refreshToken', 'old-refresh');
+    httpSpy.post.mockReturnValue(of(dummyAuthResponse));
+    jwtSpy.decodeToken.mockReturnValue({ roles: ['ROLE_ADMIN'], token_use: 'access' });
+    await service.refreshToken();
+    let isAdmin = false;
+    service.isAdmin$.subscribe(value => isAdmin = value);
+    expect(isAdmin).toBe(true);
+  });
 
   describe('login()', () => {
     beforeEach(() => {
       localStorage.clear();
     });
 
-    it('deve armazenar tokens e atualizar subjects em caso de sucesso', fakeAsync(() => {
-      httpSpy.post.and.returnValue(of(dummyAuthResponse));
-      jwtSpy.decodeToken.and.returnValue(dummyDecodedToken);
+    it('deve armazenar tokens e atualizar subjects em caso de sucesso', (async () => {
+      httpSpy.post.mockReturnValue(of(dummyAuthResponse));
+      jwtSpy.decodeToken.mockReturnValue(dummyDecodedToken);
 
       service.login('user', 'pass').subscribe({
         next: (res) => {
           expect(res).toEqual(dummyAuthResponse);
         },
         error: () => {
-          fail('Não esperava erro');
+          throw new Error('Não esperava erro');
         },
       });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(localStorage.getItem('accessToken')).toBe(
         dummyAuthResponse.accessToken
@@ -104,71 +140,71 @@ describe('AuthService', () => {
 
       let loggedIn = false;
       service.isLoggedIn$.subscribe((v) => (loggedIn = v));
-      expect(loggedIn!).toBeTrue();
+      expect(loggedIn!).toBe(true);
 
       let isAdmin = false;
       service.isAdmin$.subscribe((v) => (isAdmin = v));
-      expect(isAdmin!).toBeTrue();
+      expect(isAdmin!).toBe(true);
     }));
 
-    it('deve emitir erro "Erro no login" em caso de falha HTTP', fakeAsync(() => {
-      httpSpy.post.and.returnValue(
+    it('deve emitir erro "Erro no login" em caso de falha HTTP', (async () => {
+      httpSpy.post.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 401 }))
       );
 
       service.login('user', 'wrong').subscribe({
         next: () => {
-          fail('Não esperava sucesso');
+          throw new Error('Não esperava sucesso');
         },
         error: (err) => {
           expect(err.message).toBe('Erro no login');
         },
       });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
     }));
   });
 
   describe('register()', () => {
-    it('deve completar sem emitir valor em caso de sucesso', fakeAsync(() => {
-      httpSpy.post.and.returnValue(of({}));
+    it('deve completar sem emitir valor em caso de sucesso', (async () => {
+      httpSpy.post.mockReturnValue(of({}));
       service.register('joao', 'senha', 'USER').subscribe({
         next: (res) => {
           expect(res).toBeUndefined();
         },
         complete: () => {},
         error: () => {
-          fail('Não esperava erro');
+          throw new Error('Não esperava erro');
         },
       });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
     }));
 
-    it('deve emitir erro "Usuário já existe" quando status 409', fakeAsync(() => {
+    it('deve emitir erro "Usuário já existe" quando status 409', (async () => {
       const httpError = new HttpErrorResponse({ status: 409 });
-      httpSpy.post.and.returnValue(throwError(() => httpError));
+      httpSpy.post.mockReturnValue(throwError(() => httpError));
       service.register('joao', 'senha', 'USER').subscribe({
         next: () => {
-          fail('Não esperava sucesso');
+          throw new Error('Não esperava sucesso');
         },
         error: (err) => {
           expect(err.message).toBe('Usuário já existe');
         },
       });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
     }));
 
-    it('deve emitir erro genérico em outro status', fakeAsync(() => {
+    it('deve emitir erro genérico em outro status', (async () => {
       const httpError = new HttpErrorResponse({ status: 500 });
-      httpSpy.post.and.returnValue(throwError(() => httpError));
+      httpSpy.post.mockReturnValue(throwError(() => httpError));
       service.register('joao', 'senha', 'USER').subscribe({
         next: () => {
-          fail('Não esperava sucesso');
+          throw new Error('Não esperava sucesso');
         },
         error: (err) => {
           expect(err.message).toBe('Erro ao registrar usuário');
         },
       });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
     }));
   });
 
@@ -186,11 +222,11 @@ describe('AuthService', () => {
 
       let loggedIn = true;
       service.isLoggedIn$.subscribe((v) => (loggedIn = v));
-      expect(loggedIn!).toBeFalse();
+      expect(loggedIn!).toBe(false);
 
       let isAdmin = true;
       service.isAdmin$.subscribe((v) => (isAdmin = v));
-      expect(isAdmin!).toBeFalse();
+      expect(isAdmin!).toBe(false);
     });
   });
 
@@ -214,28 +250,28 @@ describe('AuthService', () => {
       localStorage.clear();
     });
 
-    it('deve rejeitar se não houver refreshToken', fakeAsync(() => {
+    it('deve rejeitar se não houver refreshToken', (async () => {
       let caughtError: any;
       service
         .refreshToken()
         .then(() => {
-          fail('Não esperava sucesso');
+          throw new Error('Não esperava sucesso');
         })
         .catch((err) => {
           caughtError = err;
         });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
       expect(caughtError).toBe('Sem refresh token');
     }));
 
-    it('deve renovar tokens em caso de sucesso HTTP', fakeAsync(() => {
+    it('deve renovar tokens em caso de sucesso HTTP', (async () => {
       localStorage.setItem('refreshToken', 'oldRefresh');
       const newAuth: any = {
         accessToken: 'newAccess',
         refreshToken: 'newRefresh',
       };
-      httpSpy.post.and.returnValue(of(newAuth));
-      jwtSpy.decodeToken.and.returnValue({ role: 'ADMIN' });
+      httpSpy.post.mockReturnValue(of(newAuth));
+      jwtSpy.decodeToken.mockReturnValue({ role: 'ADMIN', token_use: 'access' });
 
       let resultToken: string | undefined;
       service
@@ -244,51 +280,51 @@ describe('AuthService', () => {
           resultToken = token;
         })
         .catch(() => {
-          fail('Não esperava erro');
+          throw new Error('Não esperava erro');
         });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(localStorage.getItem('accessToken')).toBe('newAccess');
       expect(localStorage.getItem('refreshToken')).toBe('newRefresh');
 
       let loggedIn = false;
       service.isLoggedIn$.subscribe((v) => (loggedIn = v));
-      expect(loggedIn!).toBeTrue();
+      expect(loggedIn!).toBe(true);
 
       let isAdmin = false;
       service.isAdmin$.subscribe((v) => (isAdmin = v));
-      expect(isAdmin!).toBeTrue();
+      expect(isAdmin!).toBe(true);
 
       expect(resultToken).toBe('newAccess');
     }));
 
-    it('deve rejeitar e limpar dados se HTTP falhar', fakeAsync(() => {
+    it('deve rejeitar e limpar dados se HTTP falhar', (async () => {
       localStorage.setItem('refreshToken', 'oldRefresh');
-      httpSpy.post.and.returnValue(
+      httpSpy.post.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 401 }))
       );
-      spyOn(service as any, 'clearAuthData').and.callThrough();
+      vi.spyOn(service as any, 'clearAuthData');
 
       let caughtError: any;
       service
         .refreshToken()
         .then(() => {
-          fail('Não esperava sucesso');
+          throw new Error('Não esperava sucesso');
         })
         .catch((err) => {
           caughtError = err;
         });
-      tick();
+      await new Promise(resolve => setTimeout(resolve, 0));
       expect((service as any).clearAuthData).toHaveBeenCalled();
       expect(caughtError).toBe('Não foi possível renovar token');
 
       let loggedIn = true;
       service.isLoggedIn$.subscribe((v) => (loggedIn = v));
-      expect(loggedIn!).toBeFalse();
+      expect(loggedIn!).toBe(false);
 
       let isAdmin = true;
       service.isAdmin$.subscribe((v) => (isAdmin = v));
-      expect(isAdmin!).toBeFalse();
+      expect(isAdmin!).toBe(false);
     }));
   });
 });

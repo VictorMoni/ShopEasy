@@ -1,9 +1,9 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { OrderCreateComponent } from './order-create.component';
 import { ProductService } from '../../products/product.service';
 import { OrderService } from '../order.service';
@@ -17,9 +17,9 @@ import { By } from '@angular/platform-browser';
 describe('OrderCreateComponent', () => {
   let component: OrderCreateComponent;
   let fixture: ComponentFixture<OrderCreateComponent>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
-  let orderServiceSpy: jasmine.SpyObj<OrderService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let productServiceSpy: Mocked<ProductService>;
+  let orderServiceSpy: Mocked<OrderService>;
+  let routerSpy: Mocked<Router>;
 
   const dummyPage: PageProductResponse = {
     content: [
@@ -49,9 +49,9 @@ describe('OrderCreateComponent', () => {
   };
 
   beforeEach(async () => {
-    const prodSpy = jasmine.createSpyObj('ProductService', ['list']);
-    const ordSpy = jasmine.createSpyObj('OrderService', ['create']);
-    const rtrSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const prodSpy = createMock('ProductService', ['list']);
+    const ordSpy = createMock('OrderService', ['create']);
+    const rtrSpy = createMock('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule],
@@ -64,21 +64,21 @@ describe('OrderCreateComponent', () => {
 
     productServiceSpy = TestBed.inject(
       ProductService
-    ) as jasmine.SpyObj<ProductService>;
+    ) as Mocked<ProductService>;
     orderServiceSpy = TestBed.inject(
       OrderService
-    ) as jasmine.SpyObj<OrderService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    ) as Mocked<OrderService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
 
-    productServiceSpy.list.and.returnValue(of(dummyPage));
+    productServiceSpy.list.mockReturnValue(of(dummyPage));
 
     fixture = TestBed.createComponent(OrderCreateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('deve criar o componente e carregar produtos via produtos$', fakeAsync(() => {
-    tick();
+  it('deve criar o componente e carregar produtos via produtos$', (async () => {
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
     expect(productServiceSpy.list).toHaveBeenCalledWith(
       '',
@@ -114,7 +114,7 @@ describe('OrderCreateComponent', () => {
     expect(component.error).toBeNull();
   });
 
-  it('submitOrder com itens válidos deve chamar orderService.create e navegar', fakeAsync(() => {
+  it('submitOrder com itens válidos deve chamar orderService.create e navegar', (async () => {
     const produto = dummyPage.content[0];
     component.cart = [{ product: produto, quantity: 1 }];
 
@@ -133,10 +133,10 @@ describe('OrderCreateComponent', () => {
         },
       ],
     };
-    orderServiceSpy.create.and.returnValue(of(mockOrderResponse));
+    orderServiceSpy.create.mockReturnValue(of(mockOrderResponse));
 
     component.submitOrder();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(orderServiceSpy.create).toHaveBeenCalledWith({
@@ -145,19 +145,19 @@ describe('OrderCreateComponent', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/orders']);
   }));
 
-  it('submitOrder se orderService.create falhar deve exibir mensagem de erro', fakeAsync(() => {
+  it('submitOrder se orderService.create falhar deve exibir mensagem de erro', (async () => {
     const produto = dummyPage.content[0];
     component.cart = [{ product: produto, quantity: 1 }];
 
-    orderServiceSpy.create.and.returnValue(
+    orderServiceSpy.create.mockReturnValue(
       throwError({ error: { message: 'Falha' } })
     );
 
     component.submitOrder();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.error).toContain('Erro ao criar pedido.');
-    expect(component.loadingSubmit).toBeFalse();
+    expect(component.loadingSubmit).toBe(false);
   }));
 });

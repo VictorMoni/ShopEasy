@@ -1,4 +1,4 @@
-# ShopEasy security review — 2026-10-20
+# ShopEasy security review — 2026-10-22
 
 ## Corrections
 
@@ -18,15 +18,28 @@
 
 Security tests cover token confusion, cross-customer order reads, Kafka authorization, negative order quantities, authentication limits and repeatable catalog insertion. Public smoke checks must also be repeated after deployment.
 
-This is a targeted application review, not a penetration test or a guarantee that all vulnerabilities are eliminated. Refresh tokens remain in browser localStorage, are not single-use/revocable, and logout clears the browser rather than server-side revocation. A production store should use a deliberate HttpOnly-cookie/session design with CSRF protection, revocation/rotation, distributed rate limiting, backups and monitoring. Review transitive Java dependencies separately; no full Java vulnerability scan was completed here. Do not use real customer or payment information in this portfolio demonstration.
+This is a targeted application review, not a penetration test or a guarantee that all vulnerabilities are eliminated. Refresh tokens remain in browser localStorage, are not single-use/revocable, and logout clears the browser rather than server-side revocation. A production store should use a deliberate HttpOnly-cookie/session design with CSRF protection, revocation/rotation, distributed rate limiting, backups and monitoring. The runtime Java dependency tree is audited with OSV in CI; see the reviewed applicability exceptions below. Do not use real customer or payment information in this portfolio demonstration.
 
 References:
 - https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html
 - https://docs.spring.io/spring-security/reference/6.5/servlet/authentication/session-management.html
 
-Dependency validation: Angular framework aligned to 20.3.34 and tooling updated within Angular 20. The final npm production audit (`npm audit --omit=dev`) reported zero known vulnerabilities. The full development dependency tree still has nine high-severity advisories; resolving those requires a separately tested tooling migration. Production audit results do not cover Java dependencies or unknown vulnerabilities.
+## Dependency validation
 
-Local validation: 22 distinct backend tests and 22 focused frontend tests passed; the hosting Angular production build passed (422.62 kB initial bundle).
+Angular framework/tooling migrated to 21.2.25/21.2.27, TypeScript 5.9 and Vitest 4.1.12. Karma/Jasmine and unused Angular packages were removed. Vite and MCP SDK overrides select compatible patched releases. The complete npm audit, including development dependencies, reports zero known advisories on 2026-10-22.
+
+Spring Boot is 3.5.16, JJWT 0.12.7 and springdoc 2.8.17. Patched overrides select Tomcat 10.1.61, Jackson 2.21.8, Log4j 2.25.5, commons-lang3 3.18.0 and lz4-java 1.12.1. All 36 backend tests pass with these versions.
+
+OSV inspected 100 compile/runtime packages. Two Spring MVC advisories remain in the dependency version, but their required features are absent from this JSON REST API:
+
+- [CVE-2026-47890](https://spring.io/security/cve-2026-47890/), GHSA-j9f9-w8pj-32f8: requires SSE view fragments; no SSE or server-rendered views exist here.
+- [CVE-2026-47884](https://spring.io/security/cve-2026-47884/), GHSA-pc63-qcmh-9cmg: requires XsltView with implicit view rendering; there are no XSLT views or view controllers.
+
+These are applicability exceptions, not dependency fixes. `security/osv-exceptions.json` limits them to the exact package/version and expires on 2026-11-21. CI fails for new/unreviewed advisories, expired exceptions or source symbols indicating these features. The scan is not a substitute for code review. An eventual Spring Boot 4 migration should remove the exceptions after full compatibility testing.
+
+## First-visit behavior
+
+Anonymous catalog navigation retains authentication and shows an inline explanation at login. The original unspecified warning could not be reproduced conclusively. An additional stale-session edge case was corrected: legacy, wrong-purpose, expired and malformed stored access tokens clear the session instead of opening the catalog with an invalid session. Regression tests cover malformed/legacy tokens and admin roles after refresh.
 
 The hosted database enforces primary keys. Order and item IDs now use a keyed TABLE generator rather than keyless implicit sequence tables. The hosted initializer advances the counters to preserve existing IDs; the database protection remains enabled. Local order persistence tests passed.
 

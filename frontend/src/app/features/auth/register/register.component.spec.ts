@@ -1,13 +1,13 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import { RouterTestingModule } from '@angular/router/testing';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -16,25 +16,24 @@ import { By } from '@angular/platform-browser';
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let authServiceSpy: Mocked<AuthService>;
+  let routerSpy: Mocked<Router>;
 
   beforeEach(async () => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['register']);
-    const rtrSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const routeStub = { snapshot: { paramMap: { get: () => null } } };
+    const authSpy = createMock('AuthService', ['register']);
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule, RouterTestingModule],
       providers: [
         { provide: AuthService, useValue: authSpy },
-        { provide: Router, useValue: rtrSpy },
-        { provide: ActivatedRoute, useValue: routeStub },
+        provideRouter([]),
+
       ],
     }).compileComponents();
 
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    authServiceSpy = TestBed.inject(AuthService) as Mocked<AuthService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
+    vi.spyOn(routerSpy, 'navigate').mockResolvedValue(true);
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
@@ -46,7 +45,7 @@ describe('RegisterComponent', () => {
   });
 
   it('form deve ser inválido inicialmente', () => {
-    expect(component.registerForm.valid).toBeFalse();
+    expect(component.registerForm.valid).toBe(false);
     const controls = component.registerForm.controls;
     expect(controls['username'].value).toBe('');
     expect(controls['password'].value).toBe('');
@@ -58,16 +57,16 @@ describe('RegisterComponent', () => {
     expect(authServiceSpy.register).not.toHaveBeenCalled();
   });
 
-  it('onSubmit deve chamar AuthService.register e exibir mensagem de sucesso', fakeAsync(() => {
+  it('onSubmit deve chamar AuthService.register e exibir mensagem de sucesso', (async () => {
     component.registerForm.setValue({
       username: 'joao',
       password: 'senha123',
       role: 'USER',
     });
-    authServiceSpy.register.and.returnValue(of());
+    authServiceSpy.register.mockReturnValue(of(void 0));
 
     component.onSubmit();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(authServiceSpy.register).toHaveBeenCalledWith(
       'joao',
@@ -75,56 +74,56 @@ describe('RegisterComponent', () => {
       'USER'
     );
     expect(component.success).toBe(
-      'Usuário registrado com sucesso! Você pode fazer login agora.'
+      'Cadastro realizado com sucesso! Redirecionando para login...'
     );
 
-    tick(2000);
+    await new Promise(resolve => setTimeout(resolve, 2100));
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
   }));
 
-  it('onSubmit deve exibir mensagem de "usuário já existe" quando status for 409', fakeAsync(() => {
+  it('onSubmit deve exibir mensagem de "usuário já existe" quando status for 409', (async () => {
     component.registerForm.setValue({
       username: 'joao',
       password: 'senha123',
       role: 'USER',
     });
-    authServiceSpy.register.and.returnValue(throwError({ status: 409 }));
+    authServiceSpy.register.mockReturnValue(throwError(() => new Error('Usuário já existe')));
 
     component.onSubmit();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(component.error).toBe('Usuário já existe. Escolha outro nome.');
+    expect(component.error).toBe('Usuário já existe');
     expect(component.success).toBeNull();
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   }));
 
-  it('onSubmit deve exibir mensagem genérica em caso de outro erro', fakeAsync(() => {
+  it('onSubmit deve exibir mensagem genérica em caso de outro erro', (async () => {
     component.registerForm.setValue({
       username: 'joao',
       password: 'senha123',
       role: 'USER',
     });
-    authServiceSpy.register.and.returnValue(throwError({ status: 500 }));
+    authServiceSpy.register.mockReturnValue(throwError({ status: 500 }));
 
     component.onSubmit();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(component.error).toBe('Erro ao registrar usuário.');
+    expect(component.error).toBe('Erro ao registrar usuário');
     expect(component.success).toBeNull();
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   }));
 
-  it('template deve exibir mensagens de erro e sucesso corretamente', fakeAsync(() => {
+  it('template deve exibir mensagens de erro e sucesso corretamente', (async () => {
     component.error = 'Erro qualquer';
     fixture.detectChanges();
-    let errorElem = fixture.debugElement.query(By.css('p.error'));
+    let errorElem = fixture.debugElement.query(By.css('p.error-message'));
     expect(errorElem).toBeTruthy();
     expect(errorElem.nativeElement.textContent).toContain('Erro qualquer');
 
     component.error = null;
     component.success = 'Tudo OK';
     fixture.detectChanges();
-    const successElem = fixture.debugElement.query(By.css('p.success'));
+    const successElem = fixture.debugElement.query(By.css('p.success-message'));
     expect(successElem).toBeTruthy();
     expect(successElem.nativeElement.textContent).toContain('Tudo OK');
   }));

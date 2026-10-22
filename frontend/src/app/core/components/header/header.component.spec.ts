@@ -1,3 +1,5 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HeaderComponent } from './header.component';
 import { AuthService } from '../../../features/auth/auth.service';
@@ -10,10 +12,10 @@ import { provideRouter } from '@angular/router';
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let authServiceSpy: Mocked<AuthService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('AuthService', ['logout'], {
+    const spy = createMock('AuthService', ['logout'], {
       isLoggedIn$: of(true),
       isAdmin$: of(false),
     });
@@ -23,7 +25,7 @@ describe('HeaderComponent', () => {
       providers: [{ provide: AuthService, useValue: spy }, provideRouter([])],
     }).compileComponents();
 
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authServiceSpy = TestBed.inject(AuthService) as Mocked<AuthService>;
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

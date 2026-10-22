@@ -1,3 +1,5 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -6,11 +8,11 @@ import { AuthService } from '../auth.service';
 
 describe('LoginComponent', () => {
   let fixture: ComponentFixture<LoginComponent>;
-  let auth: jasmine.SpyObj<AuthService>;
+  let auth: Mocked<AuthService>;
   const route = { snapshot: { queryParamMap: convertToParamMap({}) } };
   beforeEach(async () => {
     route.snapshot.queryParamMap = convertToParamMap({});
-    auth = jasmine.createSpyObj('AuthService', ['login']);
+    auth = createMock('AuthService', ['login']);
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [provideRouter([]), { provide: AuthService, useValue: auth },
@@ -34,8 +36,8 @@ describe('LoginComponent', () => {
     expect(auth.login).not.toHaveBeenCalled();
   });
   it('opens products after a successful login', () => {
-    auth.login.and.returnValue(of({accessToken: 'test-access', refreshToken: 'test-refresh'}));
-    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    auth.login.mockReturnValue(of({accessToken: 'test-access', refreshToken: 'test-refresh'}));
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture.componentInstance.loginForm.setValue({username:'customer',password:'test-password'});
     fixture.componentInstance.onSubmit();
     expect(navigate).toHaveBeenCalledWith(['/products']);

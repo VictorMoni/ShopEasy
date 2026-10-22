@@ -28,7 +28,7 @@ export interface UserResponse {
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
-  private loggedInSubject = new BehaviorSubject<boolean>(!!this.getToken());
+  private loggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.loggedInSubject.asObservable();
 
   // Guardamos o role (string) para não precisar chamar /users/me toda hora
@@ -41,48 +41,28 @@ export class AuthService {
 
   private loadUserFromToken(): void {
     const token = this.getToken();
-    if (token && !this.jwtHelper.isTokenExpired(token)) {
-      const decoded: any = this.jwtHelper.decodeToken(token);
-
-      // 1) Pode existir "decoded.role" (uma string única), ex: "ADMIN"
-      const singleRole: string | null = decoded?.role ?? null;
-
-      // 2) Pode existir "decoded.roles" como array de strings, ex: ["ROLE_ADMIN", "ROLE_USER"]
-      // Ou até ["ADMIN","USER"], dependendo de como você gerou no backend.
-      const rolesArray: string[] = Array.isArray(decoded?.roles)
-        ? decoded.roles
-        : [];
-
-      // 3) Se houver singleRole (claim "role": "ADMIN"), basta comparar diretamente:
-      if (singleRole) {
-        this.isAdminSubject.next(singleRole === 'ADMIN');
+    try {
+      if (!token || this.jwtHelper.isTokenExpired(token)) {
+        this.clearAuthData();
+        return;
       }
-      // 4) Senão, se vier um array de roles, precisamos verificar adequadamente:
-      else if (rolesArray.length > 0) {
-        // ★ Ajuste conforme o formato que seu backend realmente envia:
-        //
-        // Se o backend envia ["ROLE_ADMIN", "ROLE_USER"], use:
-        const isAdminViaRole = rolesArray.includes('ROLE_ADMIN'); // compara exato "ROLE_ADMIN"
-        //
-        // Caso seu backend envie ["ADMIN","USER"], use:
-        // const isAdminViaRole = rolesArray.includes('ADMIN');
-        //
-        // Ou, se quiser aceitar ambos os formatos (com ou sem "ROLE_"), pode fazer:
-        // const isAdminViaRole = rolesArray.some(r => r === 'ADMIN' || r === 'ROLE_ADMIN');
-
-        this.isAdminSubject.next(isAdminViaRole);
+      const decoded = this.jwtHelper.decodeToken(token);
+      // Older sessions predate typed tokens and must authenticate again.
+      if (decoded?.token_use !== 'access') {
+        this.clearAuthData();
+        return;
       }
-      // 5) Se não veio claim alguma de roles, então não é admin:
-      else {
-        this.isAdminSubject.next(false);
-      }
-
-      // 6) Por fim, sinaliza que o usuário está logado
+      this.isAdminSubject.next(this.hasAdminRole(decoded));
       this.loggedInSubject.next(true);
-    } else {
-      // Token ausente ou expirado → limpar dados e emitir "não logado"
+    } catch {
       this.clearAuthData();
     }
+  }
+
+  private hasAdminRole(decoded: { role?: string; roles?: unknown } | null): boolean {
+    if (decoded?.role) return decoded.role === 'ADMIN';
+    return Array.isArray(decoded?.roles)
+      && decoded.roles.some(role => role === 'ADMIN' || role === 'ROLE_ADMIN');
   }
 
   private clearAuthData(): void {
@@ -104,20 +84,8 @@ export class AuthService {
           localStorage.setItem('refreshToken', res.refreshToken);
           this.loggedInSubject.next(true);
 
-          const decoded: any = this.jwtHelper.decodeToken(res.accessToken);
-          const singleRole: string | null = decoded?.role ?? null;
-          const rolesArray: string[] = Array.isArray(decoded?.roles)
-            ? decoded.roles
-            : [];
-
-          if (singleRole) {
-            this.isAdminSubject.next(singleRole === 'ADMIN');
-          } else if (rolesArray.length > 0) {
-            const isAdminViaRole = rolesArray.includes('ROLE_ADMIN');
-            this.isAdminSubject.next(isAdminViaRole);
-          } else {
-            this.isAdminSubject.next(false);
-          }
+          const decoded = this.jwtHelper.decodeToken(res.accessToken);
+          this.isAdminSubject.next(this.hasAdminRole(decoded));
         }),
         catchError((err) => {
           return throwError(() => new Error('Erro no login'));
@@ -179,9 +147,8 @@ export class AuthService {
       localStorage.setItem('refreshToken', res.refreshToken);
       this.loggedInSubject.next(true);
 
-      const decoded: any = this.jwtHelper.decodeToken(res.accessToken);
-      const role = decoded?.role || decoded?.roles || null;
-      this.isAdminSubject.next(role === 'ADMIN');
+      const decoded = this.jwtHelper.decodeToken(res.accessToken);
+      this.isAdminSubject.next(this.hasAdminRole(decoded));
 
       return res.accessToken;
     } catch (err) {

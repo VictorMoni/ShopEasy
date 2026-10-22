@@ -1,0 +1,20 @@
+{
+  "exceptions": [
+    {
+      "id": "GHSA-j9f9-w8pj-32f8",
+      "package": "org.springframework:spring-webmvc",
+      "version": "6.2.19",
+      "expires": "2026-11-21T00:00:00Z",
+      "reason": "CVE-2026-47890 requires SSE view fragments. This JSON REST API has no SSE or server-rendered views. See https://spring.io/security/cve-2026-47890/",
+      "absentSymbols": ["SseEmitter", "ServerSentEvent", "FragmentsRendering", "text/event-stream", "@Controller\n", "@Controller\r", "ViewResolver"]
+    },
+    {
+      "id": "GHSA-pc63-qcmh-9cmg",
+      "package": "org.springframework:spring-webmvc",
+      "version": "6.2.19",
+      "expires": "2026-11-21T00:00:00Z",
+      "reason": "CVE-2026-47884 requires XsltView with implicit view rendering. This API only uses RestControllers and has no XSLT/views. See https://spring.io/security/cve-2026-47884/",
+      "absentSymbols": ["XsltView", "ViewResolver", "setViewName", "ModelAndView", "@Controller\n", "@Controller\r"]
+    }
+  ]
+}

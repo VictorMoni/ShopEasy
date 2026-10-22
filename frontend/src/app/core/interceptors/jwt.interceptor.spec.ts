@@ -64,7 +64,7 @@ describe('JwtInterceptor', () => {
       return request.url === 'http://localhost:8080/api/products';
     });
 
-    expect(req.request.headers.has('Authorization')).toBeTrue();
+    expect(req.request.headers.has('Authorization')).toBe(true);
     expect(req.request.headers.get('Authorization')).toBe(
       `Bearer ${fakeToken}`
     );
@@ -76,7 +76,7 @@ describe('JwtInterceptor', () => {
     mockAuthService.setToken('private-token');
     httpClient.get('https://untrusted.example/api/products').subscribe();
     const request = httpTestingController.expectOne('https://untrusted.example/api/products');
-    expect(request.request.headers.has('Authorization')).toBeFalse();
+    expect(request.request.headers.has('Authorization')).toBe(false);
     request.flush({});
   });
 
@@ -92,7 +92,7 @@ describe('JwtInterceptor', () => {
       return request.url === '/test-url-no-token';
     });
 
-    expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.headers.has('Authorization')).toBe(false);
 
     req.flush({ data: 'ok' });
   });

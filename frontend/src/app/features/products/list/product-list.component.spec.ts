@@ -1,3 +1,5 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { provideRouter } from '@angular/router';
@@ -16,7 +18,7 @@ import { FormsModule } from '@angular/forms';
 describe('ProductListComponent', () => {
   let component: ProductListComponent;
   let fixture: ComponentFixture<ProductListComponent>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
+  let productServiceSpy: Mocked<ProductService>;
 
   const dummyPage: PageProductResponse = {
     content: [
@@ -45,8 +47,8 @@ describe('ProductListComponent', () => {
     size: 10,
   };
 
-  beforeEach(waitForAsync(() => {
-    const spy = jasmine.createSpyObj('ProductService', ['list']);
+  beforeEach((async () => {
+    const spy = createMock('ProductService', ['list']);
 
     TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, HttpClientTestingModule],
@@ -59,9 +61,9 @@ describe('ProductListComponent', () => {
 
     productServiceSpy = TestBed.inject(
       ProductService,
-    ) as jasmine.SpyObj<ProductService>;
+    ) as Mocked<ProductService>;
 
-    productServiceSpy.list.and.returnValue(of(dummyPage));
+    productServiceSpy.list.mockReturnValue(of(dummyPage));
 
     fixture = TestBed.createComponent(ProductListComponent);
     component = fixture.componentInstance;
@@ -120,8 +122,8 @@ describe('ProductListComponent', () => {
       size: 10,
     };
 
-    productServiceSpy.list.calls.reset();
-    productServiceSpy.list.and.returnValue(of(newPage));
+    productServiceSpy.list.mockClear();
+    productServiceSpy.list.mockReturnValue(of(newPage));
 
     component.totalPages = 2;
     component.changePage(1);
