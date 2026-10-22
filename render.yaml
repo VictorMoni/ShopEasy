@@ -1,0 +1,54 @@
+services:
+  - type: web
+    name: shopeasy-api-victormoni
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: hosting
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MYSQL_JDBC_URL
+        sync: false
+      - key: MYSQL_USERNAME
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+      - key: KAFKA_BOOTSTRAP_SERVERS
+        sync: false
+      - key: KAFKA_SASL_JAAS_CONFIG
+        sync: false
+      - key: AIVEN_CA_CERT
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+  - type: web
+    name: shopeasy-victormoni
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build:hosting
+    staticPublishPath: dist/frontend/browser
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+      - key: SHOP_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

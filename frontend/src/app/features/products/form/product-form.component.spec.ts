@@ -1,28 +1,25 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { ProductFormComponent } from './product-form.component';
 import { ProductService } from '../product.service';
-import { ProductRequest } from '../product.model';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { By } from '@angular/platform-browser';
 
 describe('ProductFormComponent', () => {
   let component: ProductFormComponent;
   let fixture: ComponentFixture<ProductFormComponent>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let productServiceSpy: Mocked<ProductService>;
+  let routerSpy: Mocked<Router>;
 
-  beforeEach(waitForAsync(() => {
-    const prodSpy = jasmine.createSpyObj('ProductService', ['create']);
-    const rtrSpy = jasmine.createSpyObj('Router', ['navigate']);
+  beforeEach((async () => {
+    const prodSpy = createMock('ProductService', ['create']);
+    const rtrSpy = createMock('Router', ['navigate']);
 
     TestBed.configureTestingModule({
       imports: [CommonModule, ReactiveFormsModule, FormsModule],
@@ -33,9 +30,9 @@ describe('ProductFormComponent', () => {
     }).compileComponents();
 
     productServiceSpy = TestBed.inject(
-      ProductService
-    ) as jasmine.SpyObj<ProductService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+      ProductService,
+    ) as Mocked<ProductService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
 
     fixture = TestBed.createComponent(ProductFormComponent);
     component = fixture.componentInstance;
@@ -48,64 +45,64 @@ describe('ProductFormComponent', () => {
 
   it('form deve ser inválido inicialmente', () => {
     const form = component.productForm;
-    expect(form.valid).toBeFalse();
+    expect(form.valid).toBe(false);
     expect(form.get('name')?.value).toBe('');
     expect(form.get('description')?.value).toBe('');
-    expect(form.get('price')?.value).toBeNull();
-    expect(form.get('stock')?.value).toBeNull();
+    expect(form.get('price')?.value).toBe(0);
+    expect(form.get('stock')?.value).toBe(0);
   });
 
   it('campo "name" deve ser obrigatório e ter no máximo 100 caracteres', () => {
     const nameControl = component.productForm.get('name')!;
     nameControl.setValue('');
-    expect(nameControl.hasError('required')).toBeTrue();
+    expect(nameControl.hasError('required')).toBe(true);
 
     const longString = 'a'.repeat(101);
     nameControl.setValue(longString);
-    expect(nameControl.hasError('maxlength')).toBeTrue();
+    expect(nameControl.hasError('maxlength')).toBe(true);
 
     nameControl.setValue('Nome válido');
-    expect(nameControl.valid).toBeTrue();
+    expect(nameControl.valid).toBe(true);
   });
 
   it('campo "description" deve ter no máximo 1000 caracteres', () => {
     const descControl = component.productForm.get('description')!;
     const longDesc = 'a'.repeat(1001);
     descControl.setValue(longDesc);
-    expect(descControl.hasError('maxlength')).toBeTrue();
+    expect(descControl.hasError('maxlength')).toBe(true);
 
     descControl.setValue('Descrição aceitável');
-    expect(descControl.valid).toBeTrue();
+    expect(descControl.valid).toBe(true);
   });
 
   it('campo "price" deve ser obrigatório e maior ou igual a zero', () => {
     const priceControl = component.productForm.get('price')!;
     priceControl.setValue(null);
-    expect(priceControl.hasError('required')).toBeTrue();
+    expect(priceControl.hasError('required')).toBe(true);
 
     priceControl.setValue(-10);
-    expect(priceControl.hasError('min')).toBeTrue();
+    expect(priceControl.hasError('min')).toBe(true);
 
     priceControl.setValue(0);
-    expect(priceControl.valid).toBeTrue();
+    expect(priceControl.valid).toBe(true);
 
     priceControl.setValue(25.5);
-    expect(priceControl.valid).toBeTrue();
+    expect(priceControl.valid).toBe(true);
   });
 
   it('campo "stock" deve ser obrigatório e maior ou igual a zero', () => {
     const stockControl = component.productForm.get('stock')!;
     stockControl.setValue(null);
-    expect(stockControl.hasError('required')).toBeTrue();
+    expect(stockControl.hasError('required')).toBe(true);
 
     stockControl.setValue(-5);
-    expect(stockControl.hasError('min')).toBeTrue();
+    expect(stockControl.hasError('min')).toBe(true);
 
     stockControl.setValue(0);
-    expect(stockControl.valid).toBeTrue();
+    expect(stockControl.valid).toBe(true);
 
     stockControl.setValue(10);
-    expect(stockControl.valid).toBeTrue();
+    expect(stockControl.valid).toBe(true);
   });
 
   it('onSubmit não deve chamar service.create se form for inválido', () => {
@@ -114,56 +111,43 @@ describe('ProductFormComponent', () => {
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
-  it('onSubmit deve chamar service.create e navegar em caso de sucesso', fakeAsync(() => {
-    component.productForm.setValue({
+  it('onSubmit deve emitir os dados válidos sem chamar serviços ou navegar', () => {
+    const value = {
       name: 'Produto X',
       description: 'Descrição X',
       price: 75,
       stock: 20,
-    });
-    expect(component.productForm.valid).toBeTrue();
-
-    productServiceSpy.create.and.returnValue(of({} as any));
-
+    };
+    component.productForm.setValue(value);
+    const saved = vi.spyOn(component.saved, 'emit');
     component.onSubmit();
-    tick();
-    expect(productServiceSpy.create).toHaveBeenCalledWith({
-      name: 'Produto X',
-      description: 'Descrição X',
-      price: 75,
-      stock: 20,
-    } as ProductRequest);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/products']);
-  }));
+    expect(saved).toHaveBeenCalledExactlyOnceWith(value);
+    expect(productServiceSpy.create).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
 
-  it('onSubmit deve setar error quando service.create falhar', fakeAsync(() => {
-    component.productForm.setValue({
+  it('deve preencher os valores iniciais recebidos para edição', () => {
+    const value = {
       name: 'Produto Y',
       description: 'Descrição Y',
       price: 50,
       stock: 5,
-    });
-    expect(component.productForm.valid).toBeTrue();
-
-    productServiceSpy.create.and.returnValue(throwError({ status: 500 }));
-
-    component.onSubmit();
-    tick();
-    expect(productServiceSpy.create).toHaveBeenCalled();
-    expect(component.error).toBe('Erro ao criar produto. Verifique os dados.');
-    expect(routerSpy.navigate).not.toHaveBeenCalled();
-  }));
+    };
+    component.initialData = value;
+    component.ngOnInit();
+    expect(component.productForm.value).toEqual(value);
+  });
 
   it('template não deve exibir mensagem de erro inicialmente', () => {
     fixture.detectChanges();
-    const errorElem = fixture.debugElement.query(By.css('p.error'));
+    const errorElem = fixture.debugElement.query(By.css('p.error-message'));
     expect(errorElem).toBeNull();
   });
 
   it('template deve exibir mensagem de erro quando component.error for definido', () => {
     component.error = 'Falha no servidor';
     fixture.detectChanges();
-    const errorElem = fixture.debugElement.query(By.css('p.error'));
+    const errorElem = fixture.debugElement.query(By.css('p.error-message'));
     expect(errorElem).toBeTruthy();
     expect(errorElem.nativeElement.textContent).toContain('Falha no servidor');
   });

@@ -3,6 +3,8 @@ package com.shopeasy.ecommerce.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.TableGenerator;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -25,7 +27,10 @@ import lombok.NoArgsConstructor;
 public class OrderItem {
 
     @Id
-    @GeneratedValue
+    @TableGenerator(name = "order_items_generator", table = "shopeasy_id_sequences",
+            pkColumnName = "sequence_name", valueColumnName = "next_val",
+            pkColumnValue = "order_items", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "order_items_generator")
     private Long id;
 
     @ManyToOne

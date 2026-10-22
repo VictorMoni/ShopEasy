@@ -1,10 +1,9 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { ProductDetailComponent } from './product-detail.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product.service';
@@ -17,9 +16,9 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 describe('ProductDetailComponent (ajustado)', () => {
   let component: ProductDetailComponent;
   let fixture: ComponentFixture<ProductDetailComponent>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let authServiceSpy: Mocked<AuthService>;
+  let productServiceSpy: Mocked<ProductService>;
+  let routerSpy: Mocked<Router>;
 
   const mockProduct: Product = {
     id: 42,
@@ -31,18 +30,18 @@ describe('ProductDetailComponent (ajustado)', () => {
     createdAt: '03/06/2025 15:00',
   };
 
-  beforeEach(waitForAsync(() => {
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+  beforeEach((async () => {
+    const authSpy = createMock('AuthService', [], {
       isAdmin$: of(true),
     });
 
-    const prodSpy = jasmine.createSpyObj('ProductService', [
+    const prodSpy = createMock('ProductService', [
       'getById',
       'update',
       'delete',
     ]);
 
-    const rtrSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const rtrSpy = createMock('Router', ['navigate']);
 
     const defaultRouteStub = {
       snapshot: {
@@ -65,20 +64,20 @@ describe('ProductDetailComponent (ajustado)', () => {
       ],
     }).compileComponents();
 
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authServiceSpy = TestBed.inject(AuthService) as Mocked<AuthService>;
     productServiceSpy = TestBed.inject(
       ProductService
-    ) as jasmine.SpyObj<ProductService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    ) as Mocked<ProductService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
 
-    productServiceSpy.getById.and.returnValue(of(mockProduct));
+    productServiceSpy.getById.mockReturnValue(of(mockProduct));
   }));
 
-  beforeEach(fakeAsync(() => {
+  beforeEach((async () => {
     fixture = TestBed.createComponent(ProductDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
   }));
 
   it('deve criar o componente e carregar produto', () => {
@@ -86,49 +85,41 @@ describe('ProductDetailComponent (ajustado)', () => {
     expect(component.productId).toBe(42);
     expect(productServiceSpy.getById).toHaveBeenCalledWith(42);
     expect(component.product).toEqual(mockProduct);
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
 
     expect(component.productForm.get('name')?.value).toBe(mockProduct.name);
   });
 
-  it('ngOnInit com id inválido deve exibir erro e não chamar getById', fakeAsync(() => {
-    const routeStubInvalid = {
-      snapshot: {
-        paramMap: { get: (key: string) => (key === 'id' ? 'abc' : null) },
-      },
-    };
-    TestBed.overrideProvider(ActivatedRoute, {
-      useValue: routeStubInvalid,
-    });
-
-    fixture = TestBed.createComponent(ProductDetailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    tick();
+  it('ngOnInit com id inválido deve exibir erro e não chamar getById', (async () => {
+    productServiceSpy.getById.mockClear();
+    const route = TestBed.inject(ActivatedRoute);
+    vi.spyOn(route.snapshot.paramMap, 'get').mockReturnValue('abc');
+    component.ngOnInit();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(component.error).toBe('ID de produto inválido.');
     expect(productServiceSpy.getById).not.toHaveBeenCalled();
   }));
 
-  it('loadProduct com erro 404 deve exibir mensagem "Produto não encontrado."', fakeAsync(() => {
+  it('loadProduct com erro 404 deve exibir mensagem "Produto não encontrado."', (async () => {
     component.productId = 99;
-    productServiceSpy.getById.and.returnValue(throwError({ status: 404 }));
+    productServiceSpy.getById.mockReturnValue(throwError({ status: 404 }));
 
     component.loadProduct();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(component.error).toBe('Produto não encontrado.');
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   }));
 
   it('enableEdit() deve ativar editMode e limpar error', () => {
     component.error = 'teste';
     component.enableEdit();
-    expect(component.editMode).toBeTrue();
+    expect(component.editMode).toBe(true);
     expect(component.error).toBeNull();
   });
 
-  it('cancelEdit() deve desativar editMode e recarregar produto', fakeAsync(() => {
+  it('cancelEdit() deve desativar editMode e recarregar produto', (async () => {
     component.productForm.patchValue({
       name: 'Outro',
       price: 0,
@@ -136,18 +127,18 @@ describe('ProductDetailComponent (ajustado)', () => {
       description: '',
     });
 
-    productServiceSpy.getById.calls.reset();
-    productServiceSpy.getById.and.returnValue(of(mockProduct));
+    productServiceSpy.getById.mockClear();
+    productServiceSpy.getById.mockReturnValue(of(mockProduct));
 
     component.editMode = true;
     component.cancelEdit();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(component.editMode).toBeFalse();
+    expect(component.editMode).toBe(false);
     expect(productServiceSpy.getById).toHaveBeenCalledWith(42);
   }));
 
-  it('saveChanges() com sucesso deve atualizar product e sair de editMode', fakeAsync(() => {
+  it('saveChanges() com sucesso deve atualizar product e sair de editMode', (async () => {
     component.editMode = true;
 
     component.productForm.setValue({
@@ -166,10 +157,10 @@ describe('ProductDetailComponent (ajustado)', () => {
       category: 'CAT',
       createdAt: '03/06/2025 15:00',
     };
-    productServiceSpy.update.and.returnValue(of(updatedProduct));
+    productServiceSpy.update.mockReturnValue(of(updatedProduct));
 
     component.saveChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(productServiceSpy.update).toHaveBeenCalledWith(42, {
       name: 'Alterado',
@@ -178,11 +169,11 @@ describe('ProductDetailComponent (ajustado)', () => {
       stock: 10,
     });
     expect(component.product).toEqual(updatedProduct);
-    expect(component.editMode).toBeFalse();
-    expect(component.loading).toBeFalse();
+    expect(component.editMode).toBe(false);
+    expect(component.loading).toBe(false);
   }));
 
-  it('saveChanges() com erro deve exibir mensagem e manter editMode', fakeAsync(() => {
+  it('saveChanges() com erro deve exibir mensagem e manter editMode', (async () => {
     component.editMode = true;
     component.productForm.setValue({
       name: 'Alterado',
@@ -190,40 +181,40 @@ describe('ProductDetailComponent (ajustado)', () => {
       price: 200,
       stock: 10,
     });
-    productServiceSpy.update.and.returnValue(throwError({}));
+    productServiceSpy.update.mockReturnValue(throwError({}));
 
     component.saveChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(component.error).toBe('Falha ao atualizar produto.');
-    expect(component.editMode).toBeTrue();
-    expect(component.loading).toBeFalse();
+    expect(component.editMode).toBe(true);
+    expect(component.loading).toBe(false);
   }));
 
   it('deleteProduct() cancelado no confirm não deve chamar delete()', () => {
-    spyOn(window, 'confirm').and.returnValue(false);
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
     component.deleteProduct();
     expect(productServiceSpy.delete).not.toHaveBeenCalled();
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
-  it('deleteProduct() com confirm true deve chamar delete e navegar', fakeAsync(() => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    productServiceSpy.delete.and.returnValue(of(undefined));
+  it('deleteProduct() com confirm true deve chamar delete e navegar', (async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    productServiceSpy.delete.mockReturnValue(of(undefined));
 
     component.deleteProduct();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(productServiceSpy.delete).toHaveBeenCalledWith(42);
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/products']);
   }));
 
-  it('deleteProduct() com erro deve exibir mensagem de erro', fakeAsync(() => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    productServiceSpy.delete.and.returnValue(throwError({}));
+  it('deleteProduct() com erro deve exibir mensagem de erro', (async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    productServiceSpy.delete.mockReturnValue(throwError({}));
 
     component.deleteProduct();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(component.error).toBe('Falha ao excluir produto.');
     expect(routerSpy.navigate).not.toHaveBeenCalled();

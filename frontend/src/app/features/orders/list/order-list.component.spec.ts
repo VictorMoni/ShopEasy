@@ -1,15 +1,15 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  waitForAsync,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { OrderListComponent } from './order-list.component';
 import { OrderService } from '../order.service';
 import { AuthService } from '../../auth/auth.service';
 import { OrderResponse } from '../order.model';
 import { of, throwError } from 'rxjs';
+import { provideRouter } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { By } from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -17,13 +17,13 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 describe('OrderListComponent', () => {
   let component: OrderListComponent;
   let fixture: ComponentFixture<OrderListComponent>;
-  let orderServiceSpy: jasmine.SpyObj<OrderService>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let orderServiceSpy: Mocked<OrderService>;
+  let authServiceSpy: Mocked<AuthService>;
 
   const dummyOrders: OrderResponse[] = [
     {
       id: 1,
-      createdAt: '03/06/2025 10:00',
+      createdAt: '2025-06-03T10:00:00',
       total: 150.0,
       items: [
         {
@@ -46,7 +46,7 @@ describe('OrderListComponent', () => {
     },
     {
       id: 2,
-      createdAt: '03/06/2025 11:30',
+      createdAt: '2025-06-03T11:30:00',
       total: 80.0,
       items: [
         {
@@ -66,16 +66,16 @@ describe('OrderListComponent', () => {
     totalElements: 2,
   };
 
-  beforeEach(waitForAsync(() => {
-    const orderSpy = jasmine.createSpyObj('OrderService', ['listMyOrders']);
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+  beforeEach((async () => {
+    const orderSpy = createMock('OrderService', ['listMyOrders']);
+    const authSpy = createMock('AuthService', [], {
       isLoggedIn$: of(true),
       isAdmin$: of(true),
     });
 
     TestBed.configureTestingModule({
       imports: [CommonModule, HttpClientTestingModule],
-      providers: [
+      providers: [provideRouter([]),
         { provide: OrderService, useValue: orderSpy },
         { provide: AuthService, useValue: authSpy },
       ],
@@ -83,10 +83,10 @@ describe('OrderListComponent', () => {
 
     orderServiceSpy = TestBed.inject(
       OrderService
-    ) as jasmine.SpyObj<OrderService>;
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    ) as Mocked<OrderService>;
+    authServiceSpy = TestBed.inject(AuthService) as Mocked<AuthService>;
 
-    orderServiceSpy.listMyOrders.and.returnValue(of(dummyPageResponse));
+    orderServiceSpy.listMyOrders.mockReturnValue(of(dummyPageResponse));
 
     fixture = TestBed.createComponent(OrderListComponent);
     component = fixture.componentInstance;
@@ -101,7 +101,7 @@ describe('OrderListComponent', () => {
     expect(orderServiceSpy.listMyOrders).toHaveBeenCalledWith(0, 10);
     expect(component.orders).toEqual(dummyOrders);
     expect(component.totalElements).toBe(2);
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
     expect(component.error).toBeNull();
   });
 
@@ -116,17 +116,17 @@ describe('OrderListComponent', () => {
       '03/06/2025 10:00'
     );
     expect(firstCells[2].nativeElement.textContent).toContain('150,00');
-    expect(firstCells[3].nativeElement.textContent).toContain('2 itens');
+    expect(firstCells[3].nativeElement.textContent).toContain('2 items');
   });
 
-  it('deve mostrar mensagem de erro quando listMyOrders falhar', fakeAsync(() => {
-    orderServiceSpy.listMyOrders.and.returnValue(throwError({ status: 500 }));
+  it('deve mostrar mensagem de erro quando listMyOrders falhar', (async () => {
+    orderServiceSpy.listMyOrders.mockReturnValue(throwError({ status: 500 }));
     component.loadOrders();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.error).toBe('Não foi possível carregar seus pedidos.');
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
 
     const errorElem = fixture.debugElement.query(By.css('.error-message'));
     expect(errorElem).toBeTruthy();
@@ -135,15 +135,15 @@ describe('OrderListComponent', () => {
     );
   }));
 
-  it('changePage deve chamar loadOrders com nova página válida', fakeAsync(() => {
+  it('changePage deve chamar loadOrders com nova página válida', (async () => {
     const newPageResponse = { content: [], totalElements: 2 };
-    orderServiceSpy.listMyOrders.calls.reset();
-    orderServiceSpy.listMyOrders.and.returnValue(of(newPageResponse));
+    orderServiceSpy.listMyOrders.mockClear();
+    orderServiceSpy.listMyOrders.mockReturnValue(of(newPageResponse));
 
     component.page = 0;
     component.totalElements = 20;
     component.changePage(1);
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.page).toBe(1);
@@ -151,21 +151,21 @@ describe('OrderListComponent', () => {
     expect(component.orders).toEqual([]);
   }));
 
-  it('changePage não deve avançar se nova página for negativa', fakeAsync(() => {
+  it('changePage não deve avançar se nova página for negativa', (async () => {
     component.page = 0;
     component.changePage(-1);
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.page).toBe(0);
     expect(orderServiceSpy.listMyOrders).toHaveBeenCalledTimes(1);
   }));
 
-  it('changePage não deve avançar além da última página', fakeAsync(() => {
+  it('changePage não deve avançar além da última página', (async () => {
     component.page = 1;
     component.totalElements = 20;
     component.changePage(1);
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(component.page).toBe(1);

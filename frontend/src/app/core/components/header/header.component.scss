@@ -1,46 +1,106 @@
 .header-bar {
-  background-color: #ffffff;
-  border-bottom: 1px solid #ddd;
-  padding: 0.5rem 1rem;
-
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.nav-container {
+  max-width: 1240px;
+  margin: auto;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  font-size: 1.5rem;
+  letter-spacing: -0.06em;
+  text-decoration: none;
+  font-weight: 750;
+}
+.brand > span:last-child {
+  font-weight: 400;
+}
+.brand-symbol {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  margin-right: 10px;
+  letter-spacing: -0.08em;
+  font-size: 1.7rem;
+}
+.nav-list,
+.auth-list {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.auth-list {
+  margin-left: auto;
+  gap: 22px;
+}
+.nav-list a,
+.auth-list > li > a:not(.button) {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 8px 0;
+}
+.nav-list a.active,
+.auth-list a.active {
+  color: var(--accent);
+}
+.nav-list a:hover,
+.auth-list > li > a:not(.button):hover {
+  color: var(--accent);
+}
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 12px;
+  z-index: 100;
+  background: white;
+  padding: 12px;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+}
+.skip-link:focus {
+  top: 12px;
+}
+@media (max-width: 680px) {
   .nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 16px 18px;
+    flex-wrap: wrap;
+    gap: 16px;
   }
-
-  .nav-list,
+  .brand {
+    font-size: 1.35rem;
+  }
   .auth-list {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
+    gap: 12px;
   }
-
-  .nav-list li,
-  .auth-list li {
-    margin-right: 1rem;
+  .auth-list .button {
+    padding: 10px 14px;
+    font-size: 0.75rem;
   }
-
-  a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
+  .nav-list {
+    order: 3;
+    width: 100%;
+    gap: 24px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
   }
-
-  a.active {
-    color: #007bff;
-  }
-
-  button {
-    background: transparent;
-    border: none;
-    color: #c00;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-
-  .logout-item {
-    margin-left: 1rem;
+  .auth-list button {
+    font-size: 0.75rem;
+    padding: 10px 14px;
   }
 }

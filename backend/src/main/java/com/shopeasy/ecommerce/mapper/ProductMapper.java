@@ -29,6 +29,7 @@ public class ProductMapper {
                 .price(p.getPrice())
                 .stock(p.getStock())
                 .category(p.getCategory())
+                .imageUrl(p.getImageUrl())
                 .createdAt(p.getCreatedAt() == null
                         ? null
                         : p.getCreatedAt().format(FormatUtil.DATE_TIME_FORMATTER))

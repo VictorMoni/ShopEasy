@@ -1,71 +1,10 @@
-.auth-container {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  border: 1px solid #ddd;
+// Shared controls and page surfaces are defined in src/styles.scss.
+
+.signin-note {
+  background: var(--soft);
+  border-left: 3px solid var(--accent);
   border-radius: 8px;
-  background-color: #f9f9f9;
-  font-family: Arial, sans-serif;
-
-  h2 {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .form-group {
-    margin-bottom: 1rem;
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 0.3rem;
-    }
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #bbb;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    .validation-error {
-      color: #c00;
-      font-size: 0.875rem;
-      margin-top: 0.2rem;
-    }
-  }
-
-  button {
-    width: 100%;
-    padding: 0.6rem;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  button:disabled {
-    background-color: #94c0ee;
-    cursor: not-allowed;
-  }
-
-  .error-message {
-    color: #c00;
-    background-color: #fee;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-top: 1rem;
-    text-align: center;
-  }
-
-  .redirect {
-    text-align: center;
-    margin-top: 1rem;
-
-    a {
-      color: #007bff;
-      text-decoration: none;
-      font-weight: 500;
-    }
-  }
+  padding: 14px 16px;
+  color: var(--ink);
+  font-size: .85rem;
 }

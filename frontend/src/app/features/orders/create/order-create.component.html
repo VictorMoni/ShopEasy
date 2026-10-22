@@ -1,44 +1,21 @@
 <div class="order-create-container">
-  <h2>Criar Pedido</h2>
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">DO CATÁLOGO AO CARRINHO</span>
+      <h2>Seu próximo pedido.</h2>
+      <p>Escolha os produtos, ajuste as quantidades e confira seu carrinho.</p>
+    </div>
+  </header>
 
   <div *ngIf="error" class="error-message">
     {{ error }}
   </div>
 
-  <div class="filters-container">
-    <input
-      type="text"
-      placeholder="Buscar por nome"
-      [(ngModel)]="filterName"
-      (keyup.enter)="onSearch()"
-    />
-
-    <input
-      type="text"
-      placeholder="Categoria"
-      [(ngModel)]="filterCategory"
-      (keyup.enter)="onSearch()"
-    />
-
-    <input
-      type="number"
-      placeholder="Preço mínimo"
-      [(ngModel)]="filterMinPrice"
-      (keyup.enter)="onSearch()"
-      min="0"
-    />
-
-    <input
-      type="number"
-      placeholder="Preço máximo"
-      [(ngModel)]="filterMaxPrice"
-      (keyup.enter)="onSearch()"
-      min="0"
-    />
-
-    <button (click)="onSearch()">Pesquisar</button>
-    <button (click)="clearFilters()">Limpar</button>
-  </div>
+  <app-product-filters
+    [filters]="filters"
+    (searchRequested)="onSearch()"
+    (clearRequested)="clearFilters()"
+  />
 
   <section class="product-selection">
     <h3>Produtos Disponíveis</h3>
@@ -48,43 +25,51 @@
     </div>
 
     <ng-container *ngIf="produtos$ | async as pageData">
-      <table *ngIf="pageData.content.length > 0; else noProducts">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Preço (R$)</th>
-            <th>Estoque</th>
-            <th>Quantidade</th>
-            <th>Adicionar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let produto of pageData.content">
-            <td>{{ produto.name }}</td>
-            <td>{{ produto.price | number : "1.2-2" }}</td>
-            <td>{{ produto.stock }}</td>
-            <td>
-              <input
-                type="number"
-                #qtyInput
-                min="1"
-                [max]="produto.stock"
-                placeholder="0"
-                class="qty-input"
-              />
-            </td>
-            <td>
-              <button
-                type="button"
-                (click)="addToCart(produto, qtyInput)"
-                [disabled]="produto.stock === 0"
-              >
-                Adicionar
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div
+        class="table-scroll"
+        role="region"
+        aria-label="Itens do pedido"
+        tabindex="0"
+      >
+        <table *ngIf="pageData.content.length > 0; else noProducts">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Preço (R$)</th>
+              <th>Estoque</th>
+              <th>Quantidade</th>
+              <th>Adicionar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let produto of pageData.content">
+              <td>{{ produto.name }}</td>
+              <td>{{ produto.price | number: "1.2-2" }}</td>
+              <td>{{ produto.stock }}</td>
+              <td>
+                <input
+                  type="number"
+                  #qtyInput
+                  min="1"
+                  [max]="produto.stock"
+                  placeholder="0"
+                  class="qty-input"
+                  [attr.aria-label]="'Quantidade de ' + produto.name"
+                />
+              </td>
+              <td>
+                <button
+                  type="button"
+                  (click)="addToCart(produto, qtyInput)"
+                  [disabled]="produto.stock === 0"
+                >
+                  Adicionar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <ng-template #noProducts>
         <div class="empty-list">Nenhum produto encontrado.</div>
@@ -112,34 +97,45 @@
   <section class="cart-section" *ngIf="cart.length > 0; else emptyCartTpl">
     <h3>Carrinho de Compras</h3>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Produto</th>
-          <th>Quantidade</th>
-          <th>Preço Unitário (R$)</th>
-          <th>Subtotal (R$)</th>
-          <th>Remover</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of cart">
-          <td>{{ item.product.name }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>{{ item.product.price | number : "1.2-2" }}</td>
-          <td>{{ item.product.price * item.quantity | number : "1.2-2" }}</td>
-          <td>
-            <button type="button" (click)="removeFromCart(item.product.id)">
-              ✕
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div
+      class="table-scroll"
+      role="region"
+      aria-label="Itens do pedido"
+      tabindex="0"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Preço Unitário (R$)</th>
+            <th>Subtotal (R$)</th>
+            <th>Remover</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cart">
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.product.price | number: "1.2-2" }}</td>
+            <td>{{ item.product.price * item.quantity | number: "1.2-2" }}</td>
+            <td>
+              <button
+                type="button"
+                [attr.aria-label]="'Remover ' + item.product.name"
+                (click)="removeFromCart(item.product.id)"
+              >
+                ✕
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="cart-total">
       <strong>Total Geral:</strong>
-      R$ {{ getCartTotal() | number : "1.2-2" }}
+      R$ {{ getCartTotal() | number: "1.2-2" }}
     </div>
 
     <button
@@ -154,6 +150,9 @@
   </section>
 
   <ng-template #emptyCartTpl>
-    <div class="empty-cart">O carrinho está vazio.</div>
+    <div class="empty-cart">
+      <strong>Seu carrinho espera por boas escolhas.</strong>Adicione um produto
+      do catálogo para começar.
+    </div>
   </ng-template>
 </div>

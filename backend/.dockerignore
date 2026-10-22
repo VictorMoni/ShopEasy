@@ -33,3 +33,5 @@ application-prod.properties
 *.tmp
 *.temp
 ~$*
+.local-runtime
+.env*

@@ -1,0 +1,42 @@
+server:
+  port: ${PORT:8080}
+  tomcat:
+    threads:
+      max: 20
+spring:
+  datasource:
+    url: ${MYSQL_JDBC_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+  jpa:
+    show-sql: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+jwt:
+  secret: ${JWT_SECRET}
+app:
+  cors:
+    allowed-origins: ${FRONTEND_URL}
+  registration:
+    allow-admin: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

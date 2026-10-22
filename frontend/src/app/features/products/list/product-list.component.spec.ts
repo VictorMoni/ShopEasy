@@ -1,3 +1,10 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+import { provideRouter } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
+registerLocaleData(localePt);
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ProductListComponent } from './product-list.component';
@@ -11,7 +18,7 @@ import { FormsModule } from '@angular/forms';
 describe('ProductListComponent', () => {
   let component: ProductListComponent;
   let fixture: ComponentFixture<ProductListComponent>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
+  let productServiceSpy: Mocked<ProductService>;
 
   const dummyPage: PageProductResponse = {
     content: [
@@ -40,19 +47,23 @@ describe('ProductListComponent', () => {
     size: 10,
   };
 
-  beforeEach(waitForAsync(() => {
-    const spy = jasmine.createSpyObj('ProductService', ['list']);
+  beforeEach((async () => {
+    const spy = createMock('ProductService', ['list']);
 
     TestBed.configureTestingModule({
       imports: [CommonModule, FormsModule, HttpClientTestingModule],
-      providers: [{ provide: ProductService, useValue: spy }],
+      providers: [
+        provideRouter([]),
+        { provide: ProductService, useValue: spy },
+        { provide: AuthService, useValue: { isAdmin$: of(false) } },
+      ],
     }).compileComponents();
 
     productServiceSpy = TestBed.inject(
-      ProductService
-    ) as jasmine.SpyObj<ProductService>;
+      ProductService,
+    ) as Mocked<ProductService>;
 
-    productServiceSpy.list.and.returnValue(of(dummyPage));
+    productServiceSpy.list.mockReturnValue(of(dummyPage));
 
     fixture = TestBed.createComponent(ProductListComponent);
     component = fixture.componentInstance;
@@ -70,7 +81,7 @@ describe('ProductListComponent', () => {
       undefined,
       undefined,
       0,
-      10
+      10,
     );
   });
 
@@ -81,13 +92,13 @@ describe('ProductListComponent', () => {
     expect(component.totalElements).toBe(2);
   });
 
-  it('deve exibir uma linha para cada produto na tabela', () => {
+  it('deve exibir um card com nome e preço para cada produto', () => {
     fixture.detectChanges();
 
-    const rows = fixture.debugElement.queryAll(By.css('table tbody tr'));
+    const rows = fixture.debugElement.queryAll(By.css('.product-card'));
     expect(rows.length).toBe(2);
 
-    const primeiraCelula = rows[0].query(By.css('td')).nativeElement
+    const primeiraCelula = rows[0].query(By.css('h3')).nativeElement
       .textContent;
     expect(primeiraCelula).toContain('Produto X');
   });
@@ -111,9 +122,10 @@ describe('ProductListComponent', () => {
       size: 10,
     };
 
-    productServiceSpy.list.calls.reset();
-    productServiceSpy.list.and.returnValue(of(newPage));
+    productServiceSpy.list.mockClear();
+    productServiceSpy.list.mockReturnValue(of(newPage));
 
+    component.totalPages = 2;
     component.changePage(1);
     expect(component.page).toBe(1);
     expect(productServiceSpy.list).toHaveBeenCalledWith(
@@ -122,10 +134,57 @@ describe('ProductListComponent', () => {
       undefined,
       undefined,
       1,
-      10
+      10,
     );
 
     fixture.detectChanges();
     expect(component.products[0].name).toBe('Produto Z');
+  });
+
+  it('deve enviar os filtros digitados e reiniciar a página ao buscar', async () => {
+    await fixture.whenStable();
+    const input = fixture.debugElement.query(By.css('input[name="search"]'))
+      .nativeElement as HTMLInputElement;
+    input.value = 'Caderno';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    component.page = 2;
+    fixture.debugElement
+      .query(By.css('form.filters-container'))
+      .triggerEventHandler('ngSubmit', null);
+    expect(productServiceSpy.list).toHaveBeenCalledWith(
+      'Caderno',
+      '',
+      undefined,
+      undefined,
+      0,
+      10,
+    );
+  });
+
+  it('deve limpar os filtros pela interface e recarregar a primeira página', async () => {
+    await fixture.whenStable();
+    const input = fixture.debugElement.query(By.css('input[name="search"]'))
+      .nativeElement as HTMLInputElement;
+    input.value = 'Caderno';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    component.page = 2;
+    fixture.debugElement
+      .query(By.css('form.filters-container button[type="button"]'))
+      .nativeElement.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(input.value).toBe('');
+    expect(productServiceSpy.list).toHaveBeenCalledWith(
+      '',
+      '',
+      undefined,
+      undefined,
+      0,
+      10,
+    );
   });
 });

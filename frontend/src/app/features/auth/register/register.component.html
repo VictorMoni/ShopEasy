@@ -1,53 +1,77 @@
-<section class="auth-container">
-  <h2>Registro</h2>
+<div class="auth-layout">
+  <aside class="auth-story">
+    <span class="eyebrow">BEM-VINDO À SHOPEASY</span>
+    <h1>Menos complicação.<br />Mais boas escolhas.</h1>
+    <p>
+      Explore o catálogo, monte seu pedido e acompanhe cada compra em um só
+      espaço.
+    </p>
+    <span class="story-mark" aria-hidden="true">se.</span>
+  </aside>
+  <section class="auth-container">
+    <span class="eyebrow">Um novo começo</span>
+    <h2>Crie sua conta.</h2>
+    <p>Tudo pronto para a sua próxima escolha.</p>
 
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="username">Usuário:</label>
-      <input id="username" formControlName="username" />
-      <div
-        class="validation-error"
-        *ngIf="
-          registerForm.get('username')?.invalid &&
-          registerForm.get('username')?.touched
-        "
-      >
-        Usuário obrigatório (mínimo 3 caracteres).
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Usuário</label>
+        <input
+          id="username"
+          autocomplete="username"
+          placeholder="Seu nome de usuário"
+          formControlName="username"
+        />
+        <div
+          class="validation-error"
+          *ngIf="
+            registerForm.get('username')?.invalid &&
+            registerForm.get('username')?.touched
+          "
+        >
+          Usuário obrigatório (mínimo 3 caracteres).
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="password">Senha:</label>
-      <input id="password" type="password" formControlName="password" />
-      <div
-        class="validation-error"
-        *ngIf="
-          registerForm.get('password')?.invalid &&
-          registerForm.get('password')?.touched
-        "
-      >
-        Senha obrigatória (mínimo 6 caracteres).
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="new-password"
+          placeholder="Sua senha"
+          formControlName="password"
+        />
+        <div
+          class="validation-error"
+          *ngIf="
+            registerForm.get('password')?.invalid &&
+            registerForm.get('password')?.touched
+          "
+        >
+          Senha obrigatória (mínimo 6 caracteres).
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="role">Role:</label>
-      <select id="role" formControlName="role">
-        <option value="USER">USER</option>
-        <option value="ADMIN">ADMIN</option>
-      </select>
-    </div>
+      <div class="form-group" *ngIf="allowAdminRegistration">
+        <label for="role">Tipo de conta</label>
+        <select id="role" formControlName="role">
+          <option value="USER">Cliente</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </div>
 
-    <button type="submit" [disabled]="registerForm.invalid || loading">
-      {{ loading ? "Registrando..." : "Registrar" }}
-    </button>
+      <button type="submit" [disabled]="registerForm.invalid || loading">
+        {{ loading ? "Registrando..." : "Registrar" }}
+      </button>
 
-    <p *ngIf="error" class="error-message">{{ error }}</p>
-    <p *ngIf="success" class="success-message">{{ success }}</p>
-  </form>
+      <p *ngIf="error" class="error-message">{{ error }}</p>
+      <p *ngIf="success" class="success-message">{{ success }}</p>
+    </form>
 
-  <p class="redirect">
-    Já possui conta?
-    <a routerLink="/login">Faça login</a>
-  </p>
-</section>
+    <p class="redirect">
+      Já possui conta?
+      <a routerLink="/login">Faça login</a>
+    </p>
+  </section>
+</div>

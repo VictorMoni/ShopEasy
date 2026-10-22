@@ -1,0 +1,43 @@
+<form
+  class="filters-container"
+  (ngSubmit)="searchRequested.emit()"
+  aria-label="Filtrar produtos"
+>
+  <label
+    ><span>O que você procura?</span
+    ><input
+      type="search"
+      name="search"
+      placeholder="Pesquisar produto..."
+      [(ngModel)]="filters.name"
+  /></label>
+  <label
+    ><span>Categoria</span
+    ><input
+      name="category"
+      placeholder="Todas as categorias"
+      [(ngModel)]="filters.category"
+  /></label>
+  <label
+    ><span>Preço mínimo</span
+    ><input
+      type="number"
+      name="minPrice"
+      placeholder="R$ 0,00"
+      [(ngModel)]="filters.minPrice"
+      min="0"
+  /></label>
+  <label
+    ><span>Preço máximo</span
+    ><input
+      type="number"
+      name="maxPrice"
+      placeholder="Sem limite"
+      [(ngModel)]="filters.maxPrice"
+      min="0"
+  /></label>
+  <button type="submit">Buscar</button
+  ><button type="button" class="secondary" (click)="clearRequested.emit()">
+    Limpar
+  </button>
+</form>

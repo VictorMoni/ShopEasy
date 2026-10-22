@@ -54,6 +54,12 @@ public class OrderServiceImpl implements OrderService {
                     log.warn("❌ Pedido não encontrado: ID {}", id);
                     return new ResourceNotFoundException("Pedido não encontrado com ID " + id);
                 });
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean admin = authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        if (authentication == null || (!admin && !order.getUser().getUsername().equals(authentication.getName()))) {
+            throw new org.springframework.security.access.AccessDeniedException("Acesso não permitido");
+        }
         return OrderMapper.toDTO(order);
     }
 

@@ -1,10 +1,9 @@
+import { vi, type Mocked } from 'vitest';
+import { createMock } from '../../../../testing/mocks';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-  waitForAsync,
-} from '@angular/core/testing';
+  } from '@angular/core/testing';
 import { ProductCreateComponent } from './product-create.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../product.service';
@@ -16,16 +15,16 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 describe('ProductCreateComponent', () => {
   let component: ProductCreateComponent;
   let fixture: ComponentFixture<ProductCreateComponent>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let productServiceSpy: jasmine.SpyObj<ProductService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let authServiceSpy: Mocked<AuthService>;
+  let productServiceSpy: Mocked<ProductService>;
+  let routerSpy: Mocked<Router>;
 
-  beforeEach(waitForAsync(() => {
-    const aSpy = jasmine.createSpyObj('AuthService', [], {
+  beforeEach((async () => {
+    const aSpy = createMock('AuthService', [], {
       isAdmin$: of(false),
     });
-    const pSpy = jasmine.createSpyObj('ProductService', ['create']);
-    const rSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const pSpy = createMock('ProductService', ['create']);
+    const rSpy = createMock('Router', ['navigate']);
     const routeStub = {
       snapshot: {
         paramMap: { get: (key: string) => null },
@@ -47,19 +46,19 @@ describe('ProductCreateComponent', () => {
       ],
     }).compileComponents();
 
-    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    authServiceSpy = TestBed.inject(AuthService) as Mocked<AuthService>;
     productServiceSpy = TestBed.inject(
       ProductService
-    ) as jasmine.SpyObj<ProductService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    ) as Mocked<ProductService>;
+    routerSpy = TestBed.inject(Router) as Mocked<Router>;
   }));
 
-  it('se isAdmin$ emitir false, deve redirecionar para /products', fakeAsync(() => {
+  it('se isAdmin$ emitir false, deve redirecionar para /products', (async () => {
     fixture = TestBed.createComponent(ProductCreateComponent);
     component = fixture.componentInstance;
 
     fixture.detectChanges();
-    tick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/products']);
   }));

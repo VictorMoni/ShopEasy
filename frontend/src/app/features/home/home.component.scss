@@ -1,0 +1,246 @@
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 50px;
+  align-items: center;
+  padding: 28px 0 60px;
+}
+.hero h1 {
+  font-size: clamp(3rem, 5.1vw, 4.4rem);
+  font-weight: 600;
+  line-height: 1.08;
+  margin-bottom: 24px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.hero-copy > p {
+  font-size: 0.97rem;
+  max-width: 420px;
+  line-height: 1.8;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 32px 0;
+}
+.text-link {
+  font-size: 0.8rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.hero-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.hero-note > span {
+  color: #527149;
+}
+.hero-art {
+  background: #e6ebdc;
+  min-height: 450px;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.circle {
+  position: absolute;
+  background: #d4ddc5;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  top: 65px;
+  left: calc(50% - 170px);
+}
+.shopping-bag {
+  position: relative;
+  width: 180px;
+  height: 225px;
+  background: #bc4c29;
+  transform: rotate(-9deg);
+  box-shadow: 22px 26px 35px #46593529;
+  display: grid;
+  place-items: center;
+  margin-top: 50px;
+  border-radius: 3px 3px 12px 12px;
+  color: #fff4d7;
+  line-height: 0.94;
+  font-size: 2.7rem;
+  letter-spacing: -0.06em;
+}
+.shopping-bag:before {
+  content: "";
+  position: absolute;
+  top: -51px;
+  left: 48px;
+  width: 78px;
+  height: 80px;
+  border: 8px solid #a44123;
+  border-bottom: 0;
+  border-radius: 50px 50px 0 0;
+  z-index: -1;
+}
+.shopping-bag:after {
+  content: "";
+  position: absolute;
+  right: -14px;
+  top: 5px;
+  width: 15px;
+  height: 219px;
+  background: #943e24;
+  transform: skewY(28deg);
+  border-radius: 0 4px 7px 0;
+}
+.shopping-bag b {
+  font-weight: 750;
+}
+.art-caption {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  letter-spacing: 0.15em;
+  font-size: 0.58rem;
+  color: #4a6244;
+  font-weight: 650;
+}
+.art-tag {
+  position: absolute;
+  right: 18px;
+  bottom: 100px;
+  transform: rotate(7deg);
+  padding: 16px 20px;
+  background: #fcf9ee;
+  border-radius: 4px;
+  color: #42603c;
+  font-size: 0.8rem;
+  box-shadow: 0 6px 20px #26361a12;
+}
+.art-index {
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: #4a6244;
+}
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  border-top: 1px solid var(--line);
+  padding: 32px 0 50px;
+}
+.benefits article {
+  display: flex;
+  gap: 16px;
+}
+.benefit-number {
+  font-size: 0.6rem;
+  color: var(--accent);
+  padding-top: 5px;
+  font-weight: 750;
+}
+.benefits h2 {
+  font-size: 0.97rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.benefits p {
+  font-size: 0.78rem;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 230px;
+}
+.home-cta {
+  padding: 32px 36px;
+  background: #edece3;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.home-cta h2 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+.home-cta .eyebrow {
+  margin-bottom: 10px;
+}
+@media (max-width: 850px) {
+  .hero {
+    gap: 28px;
+  }
+  .hero h1 {
+    font-size: 3rem;
+  }
+  .hero-art {
+    min-height: 390px;
+  }
+  .hero-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+}
+@media (max-width: 640px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 8px 0 32px;
+    gap: 32px;
+  }
+  .hero h1 {
+    font-size: clamp(2.6rem, 10vw, 3.8rem);
+  }
+  .hero-art {
+    min-height: 360px;
+  }
+  .circle {
+    width: 280px;
+    height: 280px;
+    left: calc(50% - 140px);
+    top: 44px;
+  }
+  .shopping-bag {
+    width: 150px;
+    height: 190px;
+    font-size: 2.3rem;
+  }
+  .shopping-bag:before {
+    left: 36px;
+  }
+  .shopping-bag:after {
+    height: 184px;
+  }
+  .art-tag {
+    bottom: 65px;
+    font-size: 0.7rem;
+  }
+  .hero-actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+  }
+  .benefits {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .benefits p {
+    max-width: none;
+  }
+  .home-cta {
+    padding: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .home-cta h2 {
+    font-size: 1.5rem;
+  }
+}

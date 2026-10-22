@@ -12,6 +12,10 @@ WORKDIR /app
 
 COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 
+COPY --chmod=755 docker-entrypoint.sh /app/docker-entrypoint.sh
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=15.0 -Xss512k"
+USER 10001
+
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

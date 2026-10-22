@@ -1,3 +1,5 @@
+import { ProductFiltersComponent } from '../../products/filters/product-filters.component';
+import { emptyProductFilters } from '../../products/filters/product-filters.model';
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../products/product.service';
 import { Product } from '../../products/product.model';
@@ -8,14 +10,13 @@ import { PageProductResponse } from '../../products/product.model';
 import { Observable, BehaviorSubject, switchMap, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-order-create',
   templateUrl: './order-create.component.html',
   styleUrls: ['./order-create.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ProductFiltersComponent],
 })
 export class OrderCreateComponent implements OnInit {
   produtos$!: Observable<PageProductResponse>;
@@ -25,17 +26,14 @@ export class OrderCreateComponent implements OnInit {
   cart: CartItem[] = [];
   loadingSubmit = false;
 
-  filterName: string = '';
-  filterCategory: string = '';
-  filterMinPrice?: number;
-  filterMaxPrice?: number;
+  filters = emptyProductFilters();
   page = 0;
   size = 10;
 
   constructor(
     private productService: ProductService,
     private orderService: OrderService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -43,12 +41,12 @@ export class OrderCreateComponent implements OnInit {
       switchMap(() =>
         this.productService
           .list(
-            this.filterName,
-            this.filterCategory,
-            this.filterMinPrice,
-            this.filterMaxPrice,
+            this.filters.name,
+            this.filters.category,
+            this.filters.minPrice,
+            this.filters.maxPrice,
             this.page,
-            this.size
+            this.size,
           )
           .pipe(
             catchError((_) => {
@@ -60,9 +58,9 @@ export class OrderCreateComponent implements OnInit {
                 number: 0,
                 size: this.size,
               });
-            })
-          )
-      )
+            }),
+          ),
+      ),
     );
   }
 
@@ -73,10 +71,7 @@ export class OrderCreateComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterName = '';
-    this.filterCategory = '';
-    this.filterMinPrice = undefined;
-    this.filterMaxPrice = undefined;
+    this.filters = emptyProductFilters();
     this.page = 0;
     this.error = null;
     this.filterTrigger$.next();
@@ -112,7 +107,7 @@ export class OrderCreateComponent implements OnInit {
   getCartTotal(): number {
     return this.cart.reduce(
       (acc, item) => acc + item.product.price * item.quantity,
-      0
+      0,
     );
   }
 
