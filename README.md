@@ -2,9 +2,9 @@
 
 # ShopEasy
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_ShopEasy-10B981?style=for-the-badge)](https://shopeasy-victormoni.onrender.com)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_ShopEasy-10B981?style=for-the-badge)](https://shopeasy-vm.onrender.com)
 
-**Live application:** [shopeasy-victormoni.onrender.com](https://shopeasy-victormoni.onrender.com)
+**Live application:** [shopeasy-vm.onrender.com](https://shopeasy-vm.onrender.com)
 
 This repository contains a simple **E-commerce Application**, composed of:
 
