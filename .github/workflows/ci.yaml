@@ -52,6 +52,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm audit --audit-level=low
+      - run: node --test ../scripts/verify-deployment.test.mjs
       - run: npm test -- --watch=false
       - run: npm run build:hosting
         env:
@@ -66,3 +67,24 @@ jobs:
         run: docker build -t shopeasy-backend:ci backend
       - name: Validate frontend deployment image
         run: docker build -t shopeasy-frontend:ci frontend
+  deployment:
+    name: Verify Render deployment
+    needs: [backend, frontend, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: production-frontend
+      url: https://shopeasy-victormoni.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm the deployed site serves this commit
+        run: node scripts/verify-deployment.mjs
+        env:
+          DEPLOYMENT_URL: https://shopeasy-victormoni.onrender.com
