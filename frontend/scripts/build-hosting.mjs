@@ -40,6 +40,16 @@ try {
   );
   if (result.error) throw result.error;
   process.exitCode = result.status ?? 1;
+  if (result.status === 0) {
+    const revision = process.env.RENDER_GIT_COMMIT || process.env.GITHUB_SHA;
+    if (revision) {
+      if (!/^[a-f0-9]{40}$/.test(revision)) throw new Error("Invalid deployment revision");
+      writeFileSync(
+        new URL("../dist/frontend/browser/deployment.json", import.meta.url),
+        JSON.stringify({ revision }) + "\n",
+      );
+    }
+  }
 } finally {
   writeFileSync(file, original);
 }

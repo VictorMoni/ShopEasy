@@ -37,4 +37,18 @@ Render Free can sleep after 15 minutes without requests and uses monthly quotas.
 Aiven Free services may pause when inactive. This setup is for a portfolio demo,
 not a production store with uptime or durability guarantees.
 
+## GitHub deployment status
+
+After a push to master passes all three CI checks, GitHub verifies the frontend
+publication and records it in the `production-frontend` environment. The Render
+hosting build writes the public commit SHA from `RENDER_GIT_COMMIT` to
+`deployment.json`. The verification job waits up to roughly ten minutes for the
+expected SHA and checks that the storefront responds successfully. An older
+deployment or failed publication cannot produce a successful status. This status
+covers the static frontend; it does not claim the backend was redeployed.
+
+Keep Render auto-deploy enabled for the master branch. No Render API key or
+deploy hook is needed. Pull requests run verification-script tests but do not
+register a production deployment.
+
 Sources: https://render.com/docs/free and https://aiven.io/free-tier
