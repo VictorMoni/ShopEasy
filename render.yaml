@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: shopeasy-api-victormoni
+    name: shopeasy-vm-api
     runtime: docker
     plan: free
     rootDir: backend

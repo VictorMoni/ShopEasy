@@ -56,7 +56,7 @@ jobs:
       - run: npm test -- --watch=false
       - run: npm run build:hosting
         env:
-          SHOP_API_URL: https://shopeasy-api-victormoni.onrender.com
+          SHOP_API_URL: https://shopeasy-vm-api.onrender.com
   docker:
     name: ShopEasy Containers
     runs-on: ubuntu-latest
