@@ -4,8 +4,6 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_ShopEasy-10B981?style=for-the-badge)](https://shopeasy-vm.onrender.com)
 
-**Live application:** [shopeasy-vm.onrender.com](https://shopeasy-vm.onrender.com)
-
 This repository contains a simple **E-commerce Application**, composed of:
 
 - **Frontend**: SPA in **Angular 20**, packaged and served by **NGINX**.
