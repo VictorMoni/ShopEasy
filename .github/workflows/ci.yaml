@@ -56,7 +56,7 @@ jobs:
       - run: npm test -- --watch=false
       - run: npm run build:hosting
         env:
-          SHOP_API_URL: https://shopeasy-api-victormoni.onrender.com
+          SHOP_API_URL: https://shopeasy-vm-api.onrender.com
   docker:
     name: ShopEasy Containers
     runs-on: ubuntu-latest
@@ -78,7 +78,7 @@ jobs:
       deployments: write
     environment:
       name: production-frontend
-      url: https://shopeasy-victormoni.onrender.com
+      url: https://shopeasy-vm.onrender.com
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -87,4 +87,4 @@ jobs:
       - name: Confirm the deployed site serves this commit
         run: node scripts/verify-deployment.mjs
         env:
-          DEPLOYMENT_URL: https://shopeasy-victormoni.onrender.com
+          DEPLOYMENT_URL: https://shopeasy-vm.onrender.com

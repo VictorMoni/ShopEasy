@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: shopeasy-api-victormoni
+    name: shopeasy-vm-api
     runtime: docker
     plan: free
     rootDir: backend
@@ -26,7 +26,7 @@ services:
       - key: FRONTEND_URL
         sync: false
   - type: web
-    name: shopeasy-victormoni
+    name: shopeasy-vm
     runtime: static
     rootDir: frontend
     buildCommand: npm ci && npm run build:hosting
