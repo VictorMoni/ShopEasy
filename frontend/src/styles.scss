@@ -43,7 +43,7 @@ button,
   border: 1px solid transparent;
   border-radius: 10px;
   background: var(--accent);
-  color: white;
+  color: var(--button-text, white);
   font-size: 0.88rem;
   font-weight: 650;
   text-decoration: none;
@@ -499,12 +499,11 @@ hr {
   color-scheme: dark;
   --ink: #edf1e9; --muted: #aab5aa; --accent: #f5a17b; --accent-hover: #ffc09f;
   --paper: #141a17; --surface: #1d2620; --line: #344238; --soft: #27332b;
+  --button-text: #26170f;
   --story: #28362b; --art: #2d3c2c; --circle: #3a4e35; --art-text: #c2d8b4;
   --tag: #23301f; --cta: #242f26;
 }
 body { background: var(--paper); color: var(--ink); }
-:root[data-theme="dark"] button:not(.secondary),
-:root[data-theme="dark"] .button:not(.secondary) { color: #26170f; }
 :root[data-theme="dark"] .brand-symbol { color: #26170f; }
 :root[data-theme="dark"] .error-message { background: #3b231f; color: #ffb4a4; border-color: #704337; }
 :root[data-theme="dark"] .success-message { background: #213c2b; color: #b5e0b5; }
