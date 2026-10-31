@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../features/auth/auth.service';
 import { Observable } from 'rxjs';
@@ -11,7 +11,20 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+  darkMode = document.documentElement.dataset['theme'] === 'dark';
+  private syncTheme = () => { this.darkMode = document.documentElement.dataset['theme'] === 'dark'; };
+
+  toggleTheme(): void {
+    const theme = this.darkMode ? 'light' : 'dark';
+    document.documentElement.dataset['theme'] = theme;
+    document.documentElement.style.colorScheme = theme;
+    try { localStorage.setItem('shopeasy-theme', theme); } catch { /* Optional persistence. */ }
+    this.darkMode = !this.darkMode;
+  }
+
+  ngOnDestroy(): void { window.removeEventListener('themechange', this.syncTheme); }
+
   loggedIn$!: Observable<boolean>;
   isAdmin$!: Observable<boolean>;
 
@@ -21,6 +34,7 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    window.addEventListener('themechange', this.syncTheme);
     this.loggedIn$ = this.authService.isLoggedIn$;
     this.isAdmin$ = this.authService.isAdmin$;
   }

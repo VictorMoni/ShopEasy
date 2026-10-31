@@ -83,9 +83,9 @@ select,
 textarea {
   width: 100%;
   min-height: 46px;
-  border: 1px solid #d4d9d0;
+  border: 1px solid var(--line);
   border-radius: 9px;
-  background: #fff;
+  background: var(--surface);
   padding: 11px 13px;
   color: var(--ink);
 }
@@ -189,7 +189,7 @@ p {
   text-align: center;
   border: 1px dashed #cbd2c5;
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--surface);
   color: var(--muted);
   margin: 24px 0;
 }
@@ -205,7 +205,7 @@ p {
 }
 .filters-container {
   padding: 20px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
   display: grid;
@@ -233,7 +233,7 @@ p {
   color: var(--muted);
 }
 .pagination button {
-  background: white;
+  background: var(--surface);
   color: var(--ink);
   border-color: var(--line);
 }
@@ -245,7 +245,7 @@ table {
   min-width: 540px;
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 12px;
   margin: 24px 0;
@@ -291,7 +291,7 @@ td a {
 .order-detail-container {
   max-width: 840px;
   margin: auto;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 36px;
@@ -348,13 +348,13 @@ hr {
   display: grid;
   grid-template-columns: 1fr 1fr;
   min-height: 620px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 24px;
   overflow: hidden;
 }
 .auth-story {
-  background: #e9eddf;
+  background: var(--story, #e9eddf);
   padding: 64px 48px;
   display: flex;
   flex-direction: column;
@@ -493,3 +493,21 @@ hr {
     scroll-behavior: auto !important;
   }
 }
+
+:root { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #edf1e9; --muted: #aab5aa; --accent: #f5a17b; --accent-hover: #ffc09f;
+  --paper: #141a17; --surface: #1d2620; --line: #344238; --soft: #27332b;
+  --story: #28362b; --art: #2d3c2c; --circle: #3a4e35; --art-text: #c2d8b4;
+  --tag: #23301f; --cta: #242f26;
+}
+body { background: var(--paper); color: var(--ink); }
+:root[data-theme="dark"] button:not(.secondary),
+:root[data-theme="dark"] .button:not(.secondary) { color: #26170f; }
+:root[data-theme="dark"] .brand-symbol { color: #26170f; }
+:root[data-theme="dark"] .error-message { background: #3b231f; color: #ffb4a4; border-color: #704337; }
+:root[data-theme="dark"] .success-message { background: #213c2b; color: #b5e0b5; }
+:root[data-theme="dark"] .validation-error { color: #ffb4a4; }
+:root[data-theme="dark"] input::placeholder { color: #9ba99e; }
+:root[data-theme="dark"] :focus-visible { outline-color: var(--accent); }

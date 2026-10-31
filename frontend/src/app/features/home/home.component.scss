@@ -39,10 +39,10 @@
   font-size: 0.7rem;
 }
 .hero-note > span {
-  color: #527149;
+  color: var(--art-text, #527149);
 }
 .hero-art {
-  background: #e6ebdc;
+  background: var(--art, #e6ebdc);
   min-height: 450px;
   border-radius: 22px;
   position: relative;
@@ -52,7 +52,7 @@
 }
 .circle {
   position: absolute;
-  background: #d4ddc5;
+  background: var(--circle, #d4ddc5);
   width: 340px;
   height: 340px;
   border-radius: 50%;
@@ -107,7 +107,7 @@
   left: 28px;
   letter-spacing: 0.15em;
   font-size: 0.58rem;
-  color: #4a6244;
+  color: var(--art-text, #4a6244);
   font-weight: 650;
 }
 .art-tag {
@@ -116,9 +116,9 @@
   bottom: 100px;
   transform: rotate(7deg);
   padding: 16px 20px;
-  background: #fcf9ee;
+  background: var(--tag, #fcf9ee);
   border-radius: 4px;
-  color: #42603c;
+  color: var(--art-text, #42603c);
   font-size: 0.8rem;
   box-shadow: 0 6px 20px #26361a12;
 }
@@ -128,7 +128,7 @@
   left: 28px;
   font-size: 0.55rem;
   letter-spacing: 0.14em;
-  color: #4a6244;
+  color: var(--art-text, #4a6244);
 }
 .benefits {
   display: grid;
@@ -160,7 +160,7 @@
 }
 .home-cta {
   padding: 32px 36px;
-  background: #edece3;
+  background: var(--cta, #edece3);
   border-radius: 18px;
   display: flex;
   align-items: center;
