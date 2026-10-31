@@ -18,7 +18,7 @@
   gap: 24px;
 }
 .product-card {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -26,7 +26,7 @@
 }
 .product-visual {
   height: 210px;
-  background: #e9edde;
+  background: var(--art, #e9edde);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,12 +35,12 @@
   overflow: hidden;
 }
 .product-visual.alternate {
-  background: #f0e6da;
+  background: var(--soft);
 }
 .product-monogram {
   font-size: 100px;
   font-weight: 600;
-  color: #65795b;
+  color: var(--art-text, #65795b);
   line-height: 1;
   transition: transform 0.2s;
 }
@@ -57,7 +57,7 @@
   font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #4e604a;
+  color: var(--art-text, #4e604a);
 }
 .product-card-body {
   padding: 24px;

@@ -68,7 +68,7 @@
   top: -100px;
   left: 12px;
   z-index: 100;
-  background: white;
+  background: var(--surface);
   padding: 12px;
   border: 2px solid var(--accent);
   border-radius: 8px;
@@ -103,4 +103,10 @@
     font-size: 0.75rem;
     padding: 10px 14px;
   }
+}
+
+.auth-list .theme-toggle { width: 44px; min-width: 44px; padding: 10px; }
+@media (max-width: 680px) {
+  .auth-list { margin-left: 0; width: 100%; justify-content: flex-end; }
+  .nav-list { order: 3; }
 }

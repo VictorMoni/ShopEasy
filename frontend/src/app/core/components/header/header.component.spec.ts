@@ -36,6 +36,29 @@ describe('HeaderComponent', () => {
     expect(btnLogout).toBeTruthy();
   });
 
+  it('alterna o tema e mantém a preferência salva', () => {
+    const previous = localStorage.getItem('shopeasy-theme');
+    const previousTheme = document.documentElement.dataset['theme'];
+    const previousScheme = document.documentElement.style.colorScheme;
+    try {
+      component.darkMode = false;
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('button.theme-toggle').click();
+      fixture.detectChanges();
+      expect(document.documentElement.dataset['theme']).toBe('dark');
+      expect(localStorage.getItem('shopeasy-theme')).toBe('dark');
+      expect(fixture.nativeElement.querySelector('button.theme-toggle').getAttribute('aria-label')).toBe('Ativar modo claro');
+      component.toggleTheme();
+      expect(document.documentElement.dataset['theme']).toBe('light');
+    } finally {
+      if (previous === null) localStorage.removeItem('shopeasy-theme');
+      else localStorage.setItem('shopeasy-theme', previous);
+      if (previousTheme === undefined) delete document.documentElement.dataset['theme'];
+      else document.documentElement.dataset['theme'] = previousTheme;
+      document.documentElement.style.colorScheme = previousScheme;
+    }
+  });
+
   it('logout deve chamar authService.logout()', () => {
     component.logout();
     expect(authServiceSpy.logout).toHaveBeenCalled();
